@@ -1,0 +1,37 @@
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dossiers de build / dist (si tu en utilises)
+dist/
+build/
+
+# Environnement
+.env
+.env.local
+.env.*.local
+
+# macOS
+.DS_Store
+
+# IDEs et éditeurs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Nodemon
+.nodemon.json
+
+# Tests coverage
+coverage/
+
+# npm global package lock (si tu veux ignorer)
+package-lock.json
+yarn.lock
