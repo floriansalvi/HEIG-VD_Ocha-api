@@ -108,22 +108,14 @@
       "isActive": true
     }
   ],
-  "regions": [
-    {
-      "id": "lausanne-region",
-      "name": "Région Lausannoise",
-      "cities": ["Lausanne", "Renens", "Prilly", "Pully", "Écublens", "Crissier", "Morges"],
-      "defaultStoreId": "store-lausanne-st-francois"
-    }
-  ],
+
   "users": [
     {
       "id": "usr-demo",
       "email": "demo@ocha.ch",
       "displayName": "Client Démo",
       "phone": "+41 76 000 00 00",
-      "createdAt": "2025-11-01T10:00:00.000Z",
-      "marketingOptIn": false
+      "createdAt": "2025-11-01T10:00:00.000Z"
     }
   ],
   "orders": [
@@ -143,8 +135,7 @@
           "totalItemCHF": 7.2
         }
       ],
-      "totalCHF": 7.2,
-      "payment": { "required": false, "status": "non-applicable" }
-    }
+      "totalPriceCHF": 7.2
+      }
   ]
 }
