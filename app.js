@@ -1,9 +1,13 @@
 import express from "express";
 import createError from "http-errors";
 import logger from "morgan";
+import mongoose, { mongo } from "mongoose";
+import dotenv from "dotenv";
 
 import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js";
+
+dotenv.config();
 
 const app = express();
 
@@ -30,4 +34,15 @@ app.use(function (err, req, res, next) {
   res.send(err.message);
 });
 
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => console.log("Connected to MongoDB"))
+  .catch(err => console.error("Could not connect to MongoDB...", err));
+
+// Start the server
+// const PORT = process.env.PORT || 3001;
+// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 export default app;
