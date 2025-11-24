@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import validator from 'validator';
 
-const productSchema = new mongoose.schema({
+const productSchema = new mongoose.Schema({
     slug: {
         type: String,
         required: [ true, 'slug requis' ],
@@ -45,7 +45,7 @@ const productSchema = new mongoose.schema({
         type: mongoose.Schema.Types.Mixed, 
         default: {S: 0, M: 2, L: 3}  
     }
-});
+},{ timestamps: true });
 
 
 // calcul du prix selon la taille
@@ -67,3 +67,6 @@ productSchema.statics.findActive = function () {
 };
 
 export default mongoose.model('Product', productSchema);3333
+
+
+//test de push
