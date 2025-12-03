@@ -22,7 +22,7 @@ const handleMongooseError = (res, error) => {
 };
 
 // POST /stores
-export const createStore = async (req, res) => {
+const createStore = async (req, res) => {
     try {
         const { name, phone, email, address, location, opening_hours } = req.body;
 
@@ -58,7 +58,7 @@ export const createStore = async (req, res) => {
 };
 
 // GET /stores
-export const getStores = async (req, res) => {
+const getStores = async (req, res) => {
     try {
         const stores = await Store.find();
         return res.status(200).json({
@@ -74,7 +74,7 @@ export const getStores = async (req, res) => {
 };
 
 // GET /stores/:id
-export const getStoreById = async (req, res) => {
+const getStoreById = async (req, res) => {
     try {
         const store = await Store.findById(req.params.id);
         if (!store) {
@@ -94,7 +94,7 @@ export const getStoreById = async (req, res) => {
 };
 
 // PATCH /stores/:id
-export const updateStore = async (req, res) => {
+const updateStore = async (req, res) => {
     try {
         const store = await Store.findById(req.params.id);
         if (!store) {
@@ -121,7 +121,7 @@ export const updateStore = async (req, res) => {
 };
 
 // DELETE /stores/:id
-export const deleteStore = async (req, res) => {
+const deleteStore = async (req, res) => {
     try {
         const store = await Store.findByIdAndDelete(req.params.id);
         if (!store) {
@@ -136,4 +136,12 @@ export const deleteStore = async (req, res) => {
             error: error.message
         });
     }
+};
+
+export const storeController = {
+    createStore,
+    getStores,
+    getStoreById,
+    updateStore,
+    deleteStore
 };

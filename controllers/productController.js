@@ -22,7 +22,7 @@ const handleMongooseError = (res, error) => {
 };
 
 // POST /products
-export const createProduct = async (req, res) => {
+const createProduct = async (req, res) => {
     try {
         const {
             slug,
@@ -72,7 +72,7 @@ export const createProduct = async (req, res) => {
 
 // GET /products
 // option: /products?active=true
-export const getProducts = async (req, res) => {
+const getProducts = async (req, res) => {
     try {
         const { active } = req.query;
         let products;
@@ -96,7 +96,7 @@ export const getProducts = async (req, res) => {
 };
 
 // GET /products/:id
-export const getProductById = async (req, res) => {
+const getProductById = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (!product) {
@@ -116,7 +116,7 @@ export const getProductById = async (req, res) => {
 };
 
 // PATCH /products/:id
-export const updateProduct = async (req, res) => {
+const updateProduct = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (!product) {
@@ -153,7 +153,7 @@ export const updateProduct = async (req, res) => {
 };
 
 // DELETE /products/:id
-export const deleteProduct = async (req, res) => {
+const deleteProduct = async (req, res) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
         if (!product) {
@@ -167,4 +167,12 @@ export const deleteProduct = async (req, res) => {
             error: error.message
         });
     }
+};
+
+export const productController = {
+    createProduct,
+    getProducts,
+    getProductById,
+    updateProduct,
+    deleteProduct
 };

@@ -1,4 +1,4 @@
-import Order from "../models/oder.js";          
+import Order from "../models/order.js";          
 import Store from "../models/store.js";
 import OrderItem from "../models/orderItem.js";
 
@@ -24,9 +24,15 @@ const handleMongooseError = (res, error) => {
 };
 
 // POST /orders
-export const createOrder = async (req, res) => {
+const createOrder = async (req, res) => {
     try {
-        const userId = req.user?.id || req.body.user_id;
+        const userId = req.user?.id;
+        
+        if (!userId) {
+            return res.status(401).json({
+                message: "Authentification requise"
+            });
+        }
 
         if (!userId) {
             return res.status(401).json({
@@ -96,7 +102,7 @@ export const createOrder = async (req, res) => {
 };
 
 // GET /orders/me
-export const getMyOrders = async (req, res) => {
+const getMyOrders = async (req, res) => {
     try {
         const userId = req.user?.id;
 
@@ -123,7 +129,7 @@ export const getMyOrders = async (req, res) => {
 };
 
 // GET /orders/:id
-export const getOrderById = async (req, res) => {
+const getOrderById = async (req, res) => {
     try {
         const order = await Order.findById(req.params.id)
             .populate("store_id")
@@ -146,7 +152,7 @@ export const getOrderById = async (req, res) => {
 };
 
 // PATCH /orders/:id/status
-export const updateOrderStatus = async (req, res) => {
+const updateOrderStatus = async (req, res) => {
     try {
         const { status } = req.body;
         if (!status) {
@@ -177,7 +183,7 @@ export const updateOrderStatus = async (req, res) => {
 };
 
 // DELETE /orders/:id
-export const deleteOrder = async (req, res) => {
+const deleteOrder = async (req, res) => {
     try {
         const order = await Order.findByIdAndDelete(req.params.id);
         if (!order) {
@@ -194,4 +200,12 @@ export const deleteOrder = async (req, res) => {
             error: error.message
         });
     }
+};
+
+export const orderController = {
+    createOrder,
+    getMyOrders,
+    getOrderById,
+    updateOrderStatus,
+    deleteOrder
 };

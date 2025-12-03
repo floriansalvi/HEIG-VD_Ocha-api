@@ -1,5 +1,5 @@
 import OrderItem from "../models/orderItem.js";
-import Order from "../models/oder.js";
+import Order from "../models/order.js";
 
 export const getItemsByOrder = async (req, res) => {
     try {
@@ -22,4 +22,8 @@ export const getItemsByOrder = async (req, res) => {
             error: error.message
         });
     }
+};
+
+export const orderItemController = {
+    getItemsByOrder
 };
