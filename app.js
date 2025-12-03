@@ -6,6 +6,10 @@ import dotenv from "dotenv";
 
 import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js";
+import storeRouter from "./routes/store.js";
+import productRouter from "./routes/product.js";
+import orderRouter from "./routes/order.js";
+import orderItemRouter from "./routes/orderItem.js";
 
 dotenv.config();
 
@@ -17,6 +21,10 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/api/stores", storeRouter);
+app.use("/api/products", productRouter);
+app.use("/api/orders", orderRouter);
+app.use("/api/order-items", orderItemRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
