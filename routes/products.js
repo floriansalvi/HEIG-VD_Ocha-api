@@ -5,18 +5,23 @@ import { admin } from "../middleware/adminMiddleware.js";
 
 const router = express.Router();
 
-// public
+// Public
+
+// List of products (filters + pagination)
 router.get(
     "/",
     productController.getProducts
 );
 
+// Details about a products
 router.get(
     "/:id",
     productController.getProductById
 );
 
-// admin ?
+// Admin
+
+// Create a new product
 router.post(
     "/",
     protect,
@@ -24,6 +29,7 @@ router.post(
     productController.createProduct
 );
 
+// Update a product
 router.patch(
     "/:id",
     protect,
@@ -31,6 +37,7 @@ router.patch(
     productController.updateProduct
 );
 
+// Delete a product
 router.delete(
     "/:id",
     protect,

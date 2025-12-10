@@ -2,6 +2,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import Store from "../models/store.js";
+import slugify from "slugify";
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/ocha-dev";
 const storesData = [
     {
         name: "Ocha Lausanne Flon",
+        slug: slugify("Ocha Lausanne Flon", { lower: true, strict: true }),
         email: "lausanne-flon@ocha.ch",
         phone: "+41214445566",
         address: {
@@ -38,6 +40,7 @@ const storesData = [
     },
     {
         name: "Ocha Genève Rive",
+        slug: slugify("Ocha Genève Rive", { lower: true, strict: true }),
         email: "geneve-rive@ocha.ch",
         phone: "+41225556677",
         address: {
@@ -63,6 +66,7 @@ const storesData = [
     },
     {
         name: "Ocha EPFL",
+        slug: slugify("Ocha EPFL", { lower: true, strict: true }),
         email: "epfl@ocha.ch",
         phone: "+41216996969",
         address: {

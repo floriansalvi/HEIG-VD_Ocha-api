@@ -5,18 +5,29 @@ import { admin } from "../middleware/adminMiddleware.js";
 
 const router = express.Router();
 
-// public
+// Public
+
+// Get paginated list of stores
 router.get(
     "/",
     storeController.getStores
 );
 
+// Get store with id
 router.get(
     "/:id",
     storeController.getStoreById
 );
 
-// admin seulement ? si oui tu peux remplacer protect par un "isAdmin"
+// Get nearby stores
+router.get(
+    "/nearby",
+    storeController.getNearbyStores
+);
+
+// Admin
+
+// Create a new store
 router.post(
     "/",
     protect,
@@ -24,6 +35,7 @@ router.post(
     storeController.createStore
 );
 
+// Update a store
 router.patch(
     "/:id",
     protect,
@@ -31,6 +43,7 @@ router.patch(
     storeController.updateStore
 );
 
+// Delete a store
 router.delete(
     "/:id",
     protect,

@@ -31,7 +31,7 @@ export const protect = async (req, res, next) => {
         next();
     } catch (error) {
         return res.status(401).json({
-            message: 'Toke invalide ou expiré',
+            message: 'Token invalide ou expiré',
             error: error.message
         });
     }

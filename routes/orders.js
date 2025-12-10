@@ -5,37 +5,52 @@ import { admin } from "../middleware/adminMiddleware.js";
 
 const router = express.Router();
 
-// utilisateur connecté
+// Conected
+
+// Create a new order
 router.post(
     "/",
     protect,
     orderController.createOrder
 );
 
+// Get list of own orders
 router.get(
     "/me",
     protect,
     orderController.getMyOrders
 );
 
+// Get details of a specific order
 router.get(
     "/:id",
     protect,
     orderController.getOrderById
 );
 
-// statut souvent réservé au staff/admin
-router.patch(
-    "/:id/status",
-    protect, admin,
-    orderController.updateOrderStatus
-);
-
-// suppression d'une commande
+// Delete an order
 router.delete(
     "/:id",
     protect,
     orderController.deleteOrder
+);
+
+// Admin
+
+// Update an order status
+router.patch(
+    "/:id/status",
+    protect,
+    admin,
+    orderController.updateOrderStatus
+);
+
+// Get orders statistics
+router.get(
+    "/stats",
+    protect,
+    admin,
+    orderController.getOrderStats
 );
 
 export default router;

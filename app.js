@@ -51,6 +51,7 @@ mongoose.connect(process.env.MONGO_URI, {
   .catch(err => console.error("Could not connect to MongoDB...", err));
 
 // Start the server
+<<<<<<< HEAD
 // const PORT = process.env.PORT || 3001;
 // app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
@@ -145,4 +146,8 @@ for (const img of images) {
 
 
 
+=======
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+>>>>>>> 97fd9da (add pagination, filters and new methods in controllers)
 export default app;

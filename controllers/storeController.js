@@ -60,9 +60,22 @@ const createStore = async (req, res) => {
 // GET /stores
 const getStores = async (req, res) => {
     try {
-        const stores = await Store.find();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+
+        const stores = await Store.find()
+            .skip(skip)
+            .limit(limit);
+
+        const totalStores = await Store.countDocuments();
+
         return res.status(200).json({
             message: "Liste des magasins",
+            page,
+            totalPages: Math.ceil(totalStores / limit),
+            totalStores,
             stores
         });
     } catch (error) {
@@ -72,6 +85,38 @@ const getStores = async (req, res) => {
         });
     }
 };
+
+const getNearbyStores = async (req, res) => {
+    const { lat, lng, radius } = req.query;
+    if (!lat || !lng) {
+        return res.status(400).json({
+            message: "Latitude et longitude requises"
+        })
+    }
+
+    const radiusInMeters = parseInt(radius) || 10000;
+
+    try {
+        const stores = await Store.find({
+            location: {
+                $near: {
+                    $geometry: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
+                    $maxDistance: radiusInMeters
+                }
+            }
+        });
+
+        return res.status(200).json({
+            message: "Magasins proches",
+            stores
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Erreur interne du serveur",
+            error: error.message
+        });
+    }
+}
 
 // GET /stores/:id
 const getStoreById = async (req, res) => {
@@ -142,6 +187,7 @@ export const storeController = {
     createStore,
     getStores,
     getStoreById,
+    getNearbyStores,
     updateStore,
     deleteStore
 };

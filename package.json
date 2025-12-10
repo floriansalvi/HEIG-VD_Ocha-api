@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "start": "node ./bin/start",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "seed:products": "node seeders/seedProducts.js",
+    "seed:stores": "node seeders/seedStores.js",
+    "seed:all": "npm run seed:products && npm run seed:stores"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

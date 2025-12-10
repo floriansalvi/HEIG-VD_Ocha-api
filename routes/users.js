@@ -5,11 +5,10 @@ import { validateDisplayName } from "../middleware/validateDisplayName.js";
 import { validatePhone } from "../middleware/validatePhone.js";
 import { validatePassword } from "../middleware/validatePassword.js";
 import { protect } from "../middleware/authMiddleware.js";
-import { admin } from "../middleware/adminMiddleware.js";
 
 const router = express.Router();
 
-// Créer un compte
+// Register
 router.post(
     "/register",
     validateEmail,
@@ -19,14 +18,19 @@ router.post(
     authController.register
 );
 
-// Se connecter
+// Login
 router.post(
     "/login",
     authController.login
 );
 
-router.get("/profile", protect, (req, res) => {
-    res.json({ user: req.user });
-});
+// Connected user profile
+router.get(
+    "/profile",
+    protect,
+    (req, res) => {
+        res.json({ user: req.user });
+    }
+);
 
 export default router;

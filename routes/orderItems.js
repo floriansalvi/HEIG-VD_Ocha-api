@@ -4,11 +4,10 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// récupérer les items d'une commande
+// Get items of a specific order
 router.get(
     "/:orderId/items",
     protect,
     orderItemController.getItemsByOrder
 );
-
 export default router;

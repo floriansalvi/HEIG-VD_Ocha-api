@@ -34,12 +34,6 @@ const createOrder = async (req, res) => {
             });
         }
 
-        if (!userId) {
-            return res.status(401).json({
-                message: "Authentification requise"
-            });
-        }
-
         const { store_id, pickup, items } = req.body;
 
         if (!store_id || !pickup || !Array.isArray(items) || items.length === 0) {
@@ -112,12 +106,29 @@ const getMyOrders = async (req, res) => {
             });
         }
 
-        const orders = await Order.find({ user_id: userId })
+        const { status, store_id } = req.query;
+
+        let filter = { user_id: userId };
+        if (status) filter.status = status;
+        if (store_id) filter.store_id = store_id;
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const orders = await Order.find(filter)
             .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
             .populate("store_id");
+        
+        const totalOrders = await Order.countDocuments(filter);
 
         return res.status(200).json({
             message: "Historique de vos commandes",
+            page,
+            totalPages: Math.ceil(totalOrders / limit),
+            totalOrders,
             orders
         });
     } catch (error) {
@@ -127,6 +138,48 @@ const getMyOrders = async (req, res) => {
         });
     }
 };
+
+// Get /orders/stats
+const getOrderStats = async (req, res) => {
+    try {
+        const stats = await Order.aggregate([
+            {
+                $group: {
+                    _id: "$user_id",
+                    totalOrders: { $sum: 1 },
+                    totalSpent: { $sum: "$total_price_chf" }
+                }
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "user"
+                }
+            },
+            {
+                $unwind: "$user"
+            },
+            {
+                $project: {
+                    _id: 0,
+                    user: "$user.display_name",
+                    totalOrders: 1,
+                    totalSpent: 1
+                }
+            }
+        ]);
+
+        return res.status(200).json({ stats });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Erreur interne du serveur",
+            error: error.message
+        });
+    }
+}
 
 // GET /orders/:id
 const getOrderById = async (req, res) => {
@@ -206,6 +259,7 @@ export const orderController = {
     createOrder,
     getMyOrders,
     getOrderById,
+    getOrderStats,
     updateOrderStatus,
     deleteOrder
 };

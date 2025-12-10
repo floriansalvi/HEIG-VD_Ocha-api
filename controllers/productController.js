@@ -75,16 +75,24 @@ const createProduct = async (req, res) => {
 const getProducts = async (req, res) => {
     try {
         const { active } = req.query;
-        let products;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
 
-        if (active === "true") {
-            products = await Product.findActive();
-        } else {
-            products = await Product.find();
-        }
+        let filter = {};
+        if (active === 'true') filter.isActive = true;
+
+        const products = await Product.find(filter)
+            .skip(skip)
+            .limit(limit);
+
+        const totalProducts = await Product.countDocuments(filter);
 
         return res.status(200).json({
             message: "Liste des produits",
+            page,
+            totalPages: Math.ceil(totalProducts / limit),
+            totalProducts,
             products
         });
     } catch (error) {
