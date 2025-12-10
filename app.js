@@ -3,6 +3,7 @@ import createError from "http-errors";
 import logger from "morgan";
 import mongoose, { mongo } from "mongoose";
 import dotenv from "dotenv";
+import { v2 as cloudinary } from 'cloudinary';
 
 import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js";
@@ -50,15 +51,7 @@ mongoose.connect(process.env.MONGO_URI, {
   .then(() => console.log("Connected to MongoDB"))
   .catch(err => console.error("Could not connect to MongoDB...", err));
 
-// Start the server
-<<<<<<< HEAD
-// const PORT = process.env.PORT || 3001;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
 //picture cloud
-  const cloudinary= require('cloudinary').v2;
-  import { v2 as cloudinary } from 'cloudinary';
-
 (async function() {
 
     // Configuration
@@ -142,12 +135,7 @@ for (const img of images) {
     console.log(autoCropUrl);    
 })();
 
-
-
-
-
-=======
+//Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
->>>>>>> 97fd9da (add pagination, filters and new methods in controllers)
 export default app;
