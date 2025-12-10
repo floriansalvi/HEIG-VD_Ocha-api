@@ -55,10 +55,14 @@ mongoose.connect(process.env.MONGO_URI, {
 (async function() {
 
     // Configuration
-    cloudinary.config({ 
-        cloud_name: 'dabosy2w2', 
-        api_key: '557295178997613', 
-        api_secret: '<your_api_secret>' // Click 'View API Keys' above to copy your API secret
+    // cloudinary.config({ 
+    //     cloud_name: 'dabosy2w2', 
+    //     api_key: '557295178997613', 
+    //     api_secret: '<your_api_secret>' // Click 'View API Keys' above to copy your API secret
+    // });
+
+    cloudinary.config({
+      secure: true
     });
     
     // Upload an image
