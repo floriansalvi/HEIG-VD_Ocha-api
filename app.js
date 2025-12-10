@@ -44,22 +44,12 @@ app.use(function (err, req, res, next) {
 });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch(err => console.error("Could not connect to MongoDB...", err));
 
 //picture cloud
 (async function() {
-
-    // Configuration
-    // cloudinary.config({ 
-    //     cloud_name: 'dabosy2w2', 
-    //     api_key: '557295178997613', 
-    //     api_secret: '<your_api_secret>' // Click 'View API Keys' above to copy your API secret
-    // });
 
     cloudinary.config({
       secure: true
