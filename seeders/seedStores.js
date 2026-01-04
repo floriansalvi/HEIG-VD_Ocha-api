@@ -8,7 +8,7 @@ dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/ocha-dev";
 
-// Données de test pour les magasins
+// Test data for stores
 const storesData = [
     {
         name: "Ocha Lausanne Flon",
@@ -26,9 +26,9 @@ const storesData = [
             // [longitude, latitude]
             coordinates: [6.629, 46.522]
         },
-        // opening_hours facultatif, si tu l'enlèves il prendra la valeur par défaut du schema
+        // opening_hours is optional; if omitted, the default value from the schema will be used
         opening_hours: [
-            [],                     // Dimanche : fermé
+            [],                     // Dimanche : closed
             ["09:00", "18:30"],     // Lundi
             ["09:00", "18:30"],     // Mardi
             ["09:00", "18:30"],     // Mercredi
@@ -54,7 +54,7 @@ const storesData = [
             coordinates: [6.149, 46.203]
         },
         opening_hours: [
-            [],                     // Dimanche : fermé
+            [],                     // Dimanche : closed
             ["09:30", "19:00"],     // Lundi
             ["09:30", "19:00"],     // Mardi
             ["09:30", "19:00"],     // Mercredi
@@ -80,7 +80,7 @@ const storesData = [
             coordinates: [6.566, 46.519]
         },
         opening_hours: [
-            [],                     // Dimanche : fermé
+            [],                     // Dimanche : closed
             ["09:00", "18:30"],     // Lundi
             ["09:00", "18:30"],     // Mardi
             ["09:00", "18:30"],     // Mercredi
@@ -94,19 +94,19 @@ const storesData = [
 
 const seedStores = async () => {
     try {
-        console.log("Connexion à MongoDB...");
+        console.log("Connecting to MongoDB...");
         await mongoose.connect(MONGO_URI);
 
-        console.log("Suppression des magasins existants...");
+        console.log("Deleting existing stores...");
         await Store.deleteMany();
 
-        console.log("Insertion des nouveaux magasins...");
+        console.log("Inserting new stores...");
         const createdStores = await Store.insertMany(storesData);
 
-        console.log(` Seed terminé : ${createdStores.length} magasins créés.`);
+        console.log(` Seed completed: ${createdStores.length} stores created.`);
         process.exit(0);
     } catch (error) {
-        console.error("Erreur lors du seed des magasins :", error.message);
+        console.error("Error during store seeding:", error.message);
         process.exit(1);
     }
 };

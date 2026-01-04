@@ -122,19 +122,19 @@ const productsData = [
 
 const seedProducts = async () => {
     try {
-        console.log("Connexion à MongoDB...");
+        console.log("Connecting to MongoDB...");
         await mongoose.connect(MONGO_URI);
 
-        console.log("Suppression des produits existants...");
+        console.log("Deleting existing products...");
         await Product.deleteMany();
 
-        console.log("Insertion des nouveaux produits (matchas)...");
+        console.log("Inserting new products...");
         const createdProducts = await Product.insertMany(productsData);
 
-        console.log(`Seed terminé : ${createdProducts.length} produits créés.`);
+        console.log(`Seed completed: ${createdProducts.length} products created.`);
         process.exit(0);
     } catch (error) {
-        console.error("Erreur lors du seed des produits :", error.message);
+        console.error("Error during product seeding:", error.message);
         process.exit(1);
     }
 };
