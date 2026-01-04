@@ -66,6 +66,3 @@ productSchema.statics.findActive = function () {
 };
 
 export default mongoose.model('Product', productSchema);3333
-
-
-//test de push
