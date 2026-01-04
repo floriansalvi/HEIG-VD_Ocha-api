@@ -1,4 +1,4 @@
-import Store from "../models/store.js";
+import Store from "../../models/store.js";
 
 /**
  * Handle Mongoose-related errors and return an appropriate HTTP response.

@@ -1,5 +1,5 @@
-import OrderItem from "../models/orderItem.js";
-import Order from "../models/order.js";
+import OrderItem from "../../models/orderItem.js";
+import Order from "../../models/order.js";
 
 
 /**

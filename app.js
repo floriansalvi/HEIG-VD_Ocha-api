@@ -5,12 +5,12 @@ import mongoose, { mongo } from "mongoose";
 import dotenv from "dotenv";
 import { v2 as cloudinary } from 'cloudinary';
 
-import indexRouter from "./routes/index.js";
-import usersRouter from "./routes/users.js";
-import ordersRouter from "./routes/orders.js";
-import orderItemsRouter from "./routes/orderItems.js";
-import productsRouter from "./routes/products.js";
-import storesRouter from "./routes/stores.js";
+import indexRouter from "./routes/v1/index.js";
+import usersRouter from "./routes/v1/users.js";
+import ordersRouter from "./routes/v1/orders.js";
+import orderItemsRouter from "./routes/v1/orderItems.js";
+import productsRouter from "./routes/v1/products.js";
+import storesRouter from "./routes/v1/stores.js";
 
 dotenv.config();
 
@@ -20,12 +20,12 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
-app.use("/orders", ordersRouter);
-app.use("/order-items", orderItemsRouter);
-app.use("/products", productsRouter);
-app.use("/stores", storesRouter);
+app.use("/api/v1", indexRouter);
+app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/orders", ordersRouter);
+app.use("/api/v1/order-items", orderItemsRouter);
+app.use("/api/v1/products", productsRouter);
+app.use("/api/v1/stores", storesRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
