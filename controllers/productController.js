@@ -1,27 +1,45 @@
 import Product from "../models/product.js";
 
+/**
+ * Handle Mongoose-related errors and return an appropriate HTTP response.
+ *
+ * @param {Object} res Express response object.
+ * @param {Error} error Mongoose error instance.
+ * @return {Object} JSON response with an appropriate HTTP status code.
+ */
 const handleMongooseError = (res, error) => {
     if (error.name === "ValidationError") {
         return res.status(422).json({
-            message: "Données invalides",
+            message: "Invalid data",
             error: error.message
         });
     }
 
     if (error.code === 11000) {
         return res.status(409).json({
-            message: "Conflit de données (slug déjà utilisé)",
+            message: "Data conflict (slug already used)",
             error: error.message
         });
     }
 
     return res.status(500).json({
-        message: "Erreur interne du serveur",
+        message: "An error occurred :",
         error: error.message
     });
 };
 
-// POST /products
+/**
+ * Create a new product.
+ *
+ * This controller:
+ * - validates required fields
+ * - ensures slug uniqueness
+ * - creates and persists the product
+ *
+ * @param {Object} req Express request object.
+ * @param {Object} res Express response object.
+ * @return {Object} JSON response containing the created product.
+ */
 const createProduct = async (req, res) => {
     try {
         const {
@@ -38,13 +56,13 @@ const createProduct = async (req, res) => {
 
         if (!slug || !name || !category || !description || basePriceCHF === undefined || !image) {
             return res.status(400).json({
-                message: "slug, name, category, description, basePriceCHF et image sont requis"
+                message: "slug, name, category, description, basePriceCHF and image are required"
             });
         }
 
         const existingSlug = await Product.findOne({ slug });
         if (existingSlug) {
-            return res.status(409).json({ message: "Slug déjà utilisé" });
+            return res.status(409).json({ message: "Slug already used" });
         }
 
         const product = new Product({
@@ -62,7 +80,7 @@ const createProduct = async (req, res) => {
         await product.save();
 
         return res.status(201).json({
-            message: "Produit créé",
+            message: "Product created",
             product
         });
     } catch (error) {
@@ -70,8 +88,15 @@ const createProduct = async (req, res) => {
     }
 };
 
-// GET /products
-// option: /products?active=true
+/**
+ * Retrieve a paginated list of products.
+ *
+ * Supports optional filtering by active status.
+ *
+ * @param {Object} req Express request object.
+ * @param {Object} res Express response object.
+ * @return {Object} JSON response containing paginated products.
+ */
 const getProducts = async (req, res) => {
     try {
         const { active } = req.query;
@@ -89,7 +114,7 @@ const getProducts = async (req, res) => {
         const totalProducts = await Product.countDocuments(filter);
 
         return res.status(200).json({
-            message: "Liste des produits",
+            message: "List of products",
             page,
             totalPages: Math.ceil(totalProducts / limit),
             totalProducts,
@@ -97,38 +122,52 @@ const getProducts = async (req, res) => {
         });
     } catch (error) {
         return res.status(500).json({
-            message: "Erreur interne du serveur",
+            message: "An error occurred : ",
             error: error.message
         });
     }
 };
 
-// GET /products/:id
+/**
+ * Retrieve a single product by its identifier.
+ *
+ * @param {Object} req Express request object.
+ * @param {Object} res Express response object.
+ * @return {Object} JSON response containing the product.
+ */
 const getProductById = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (!product) {
-            return res.status(404).json({ message: "Produit introuvable" });
+            return res.status(404).json({ message: "Product not found" });
         }
 
         return res.status(200).json({
-            message: "Produit trouvé",
+            message: "Product found",
             product
         });
     } catch (error) {
         return res.status(400).json({
-            message: "Requête invalide (id incorrect)",
+            message: "Invalid request (invalid id)",
             error: error.message
         });
     }
 };
 
-// PATCH /products/:id
+/**
+ * Update an existing product.
+ *
+ * Only predefined fields can be updated.
+ *
+ * @param {Object} req Express request object.
+ * @param {Object} res Express response object.
+ * @return {Object} JSON response containing the updated product.
+ */
 const updateProduct = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (!product) {
-            return res.status(404).json({ message: "Produit introuvable" });
+            return res.status(404).json({ message: "Product not found" });
         }
 
         const updatableFields = [
@@ -152,7 +191,7 @@ const updateProduct = async (req, res) => {
         await product.save();
 
         return res.status(200).json({
-            message: "Produit mis à jour",
+            message: "Product updated",
             product
         });
     } catch (error) {
@@ -160,23 +199,34 @@ const updateProduct = async (req, res) => {
     }
 };
 
-// DELETE /products/:id
+/**
+ * Delete a product by its identifier.
+ *
+ * @param {Object} req Express request object.
+ * @param {Object} res Express response object.
+ * @return {void}
+ */
 const deleteProduct = async (req, res) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
         if (!product) {
-            return res.status(404).json({ message: "Produit introuvable" });
+            return res.status(404).json({ message: "Product not found" });
         }
 
         return res.status(204).send();
     } catch (error) {
         return res.status(400).json({
-            message: "Requête invalide (id incorrect)",
+            message: "Invalid request (invalid id)",
             error: error.message
         });
     }
 };
 
+/**
+ * Product item controller.
+ *
+ * Groups all product-related controller methods.
+ */
 export const productController = {
     createProduct,
     getProducts,
