@@ -1,4 +1,5 @@
 import Product from "../../models/product.js";
+import cloudinary from "../../config/cloudinary.js";
 
 /**
  * Handle Mongoose-related errors and return an appropriate HTTP response.
@@ -222,6 +223,37 @@ const deleteProduct = async (req, res) => {
     }
 };
 
+const uploadProductImage = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ message: "Product not found" });
+
+        const { image } = req.body;
+        if (!image) return res.status(400).json({ message: "Image is required" });
+
+        const result = await cloudinary.uploader.upload(image, {
+            folder: "products",
+            public_id: product.slug,
+            overwrite: true,
+            transformation: [
+                { width: 500, height: 500, crop: "fill", gravity: "auto" },
+                { fetch_format: "auto", quality: "auto" }
+            ]
+        });
+
+        product.image = result.secure_url;
+        await product.save();
+
+        return res.status(200).json({
+            message: "Image uploaded successfully",
+            imageUrl: result.secure_url
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: "Error uploading image", error: error.message });
+    }
+};
+
 /**
  * Product item controller.
  *
@@ -232,5 +264,6 @@ export const productController = {
     getProducts,
     getProductById,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    uploadProductImage
 };

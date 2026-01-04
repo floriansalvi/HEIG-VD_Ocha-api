@@ -15,7 +15,7 @@ const productsData = [
         description: "Matcha latte classique, équilibré et crémeux.",
         basePriceCHF: 5.9,
         isActive: true,
-        image: "classic-matcha-latte.jpg",
+        image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/classic-matcha-latte.jpg",
         size: ["S", "M", "L"],
         extra_chf: { S: 0, M: 2, L: 3 }
     },
@@ -26,7 +26,7 @@ const productsData = [
         description: "Matcha latte doux avec une touche de vanille.",
         basePriceCHF: 6.3,
         isActive: true,
-        image: "vanilla-matcha-latte.jpg",
+        image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/vanilla-matcha-latte.jpg",
         size: ["S", "M", "L"],
         extra_chf: { S: 0, M: 2, L: 3 }
     },
@@ -37,7 +37,7 @@ const productsData = [
         description: "Matcha latte infusé au lait de coco pour une note exotique.",
         basePriceCHF: 6.3,
         isActive: true,
-        image: "coconut-matcha-latte.jpg",
+        image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/coconut-matcha-latte.jpg",
         size: ["S", "M", "L"],
         extra_chf: { S: 0, M: 2, L: 3 }
     },
@@ -48,7 +48,7 @@ const productsData = [
         description: "Matcha latte aromatisé à la lavande, floral et apaisant.",
         basePriceCHF: 6.9,
         isActive: true,
-        image: "lavender-matcha-latte.jpg",
+        image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/lavender-matcha-latte.jpg",
         size: ["S", "M", "L"],
         extra_chf: { S: 0, M: 2, L: 3 }
     },
@@ -59,7 +59,7 @@ const productsData = [
         description: "Matcha latte fruité avec purée de fraise.",
         basePriceCHF: 6.5,
         isActive: true,
-        image: "strawberry-matcha-latte.jpg",
+        image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/strawberry-matcha-latte.jpg",
         size: ["S", "M", "L"],
         extra_chf: { S: 0, M: 2, L: 3 }
     },
@@ -70,7 +70,7 @@ const productsData = [
         description: "Matcha latte avec une touche d’abricot juteux.",
         basePriceCHF: 6.9,
         isActive: true,
-        image: "apricot-matcha-latte.jpg",
+        image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/apricot-matcha-latte.jpg",
         size: ["S", "M", "L"],
         extra_chf: { S: 0, M: 2, L: 3 }
     },
@@ -81,7 +81,7 @@ const productsData = [
         description: "Matcha latte aux fruits rouges, acidulé et gourmand.",
         basePriceCHF: 7.1,
         isActive: true,
-        image: "mixed-berries-matcha-latte.jpg",
+        image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/mixed-berries-matcha-latte.jpg",
         size: ["S", "M", "L"],
         extra_chf: { S: 0, M: 2, L: 3 }
     },
@@ -92,7 +92,7 @@ const productsData = [
         description: "Matcha latte boosté à l’açaï pour une dose d’énergie.",
         basePriceCHF: 6.9,
         isActive: true,
-        image: "acai-matcha-latte.jpg",
+        image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/acai-matcha-latte.jpg",
         size: ["S", "M", "L"],
         extra_chf: { S: 0, M: 2, L: 3 }
     },
@@ -103,7 +103,7 @@ const productsData = [
         description: "Matcha latte tropical à la mangue.",
         basePriceCHF: 6.5,
         isActive: true,
-        image: "mango-matcha-latte.jpg",
+        image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/mango-matcha-latte.jpg",
         size: ["S", "M", "L"],
         extra_chf: { S: 0, M: 2, L: 3 }
     },
@@ -114,7 +114,7 @@ const productsData = [
         description: "Matcha latte gourmand aux myrtilles.",
         basePriceCHF: 6.5,
         isActive: true,
-        image: "blueberry-matcha-latte.jpg",
+        image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/blueberry-matcha-latte.jpg",
         size: ["S", "M", "L"],
         extra_chf: { S: 0, M: 2, L: 3 }
     }

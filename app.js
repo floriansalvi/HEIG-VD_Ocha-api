@@ -3,7 +3,6 @@ import createError from "http-errors";
 import logger from "morgan";
 import mongoose, { mongo } from "mongoose";
 import dotenv from "dotenv";
-import { v2 as cloudinary } from 'cloudinary';
 
 import indexRouter from "./routes/v1/index.js";
 import usersRouter from "./routes/v1/users.js";
@@ -47,87 +46,6 @@ app.use(function (err, req, res, next) {
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch(err => console.error("Could not connect to MongoDB...", err));
-
-//picture cloud
-(async function() {
-
-    cloudinary.config({
-      secure: true
-    });
-    
-    // Upload an image
-    const images = [
-   {
-    url: 'https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/classic-matcha-latte.png',
-    id: 'classic-matcha-latte'
-  },    
-  {
-    url: 'https://res.cloudinary.com/dabosy2w2/image/upload/v1765369785/vailla-matcha-latte.png',
-    id: 'vailla-matcha-latte'
-  },
-  {
-    url: 'https://res.cloudinary.com/dabosy2w2/image/upload/v1765369785/mango-matcha-latte.png',
-    id: 'mango-matcha-latte'
-  },
-  {
-    url: 'https://res.cloudinary.com/dabosy2w2/image/upload/v1765369785/blueberry-matcha-latte.png',
-    id: 'blueberry-matcha-latte'
-  },
-  {
-    url: 'https://res.cloudinary.com/dabosy2w2/image/upload/v1765369785/lavender-matcha-latte.png',
-    id: 'lavender-matcha-latte'
-  },
-   {
-    url: 'https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/mixed-berries-matcha-latte.png',
-    id: 'mixed-berries-matcha-latte'
-  },
-   {
-    url: 'https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/strawberry-matcha-latte.png',
-    id: 'strawberry-matcha-latte'
-  },
-   {
-    url: 'https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/acai-matcha-latte.png',
-    id: 'acai-matcha-latte'
-  },
-   {
-    url: 'https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/apricot-matcha-latte.png',
-    id: 'apricot-matcha-latte'
-  },
-   {
-    url: 'https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/coconut-matcha-latte.png',
-    id: 'coconut-matcha-latte'
-  }
-
-];
-
-for (const img of images) {
-  try {
-    const result = await cloudinary.uploader.upload(img.url, {
-      public_id: img.id
-    });
-    console.log("Uploaded:", result.secure_url);
-  } catch (err) {
-    console.error("Error uploading", img.id, err);
-  }
-}
-    // Optimize delivery by resizing and applying auto-format and auto-quality
-    const optimizeUrl = cloudinary.url('shoes', {
-        fetch_format: 'auto',
-        quality: 'auto'
-    });
-    
-    console.log(optimizeUrl);
-    
-    // Transform the image: auto-crop to square aspect_ratio
-    const autoCropUrl = cloudinary.url('shoes', {
-        crop: 'auto',
-        gravity: 'auto',
-        width: 500,
-        height: 500,
-    });
-    
-    console.log(autoCropUrl);    
-})();
 
 //Start the server
 // const PORT = process.env.PORT || 3000;

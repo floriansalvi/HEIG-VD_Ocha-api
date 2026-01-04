@@ -29,6 +29,13 @@ router.post(
     productController.createProduct
 );
 
+router.post(
+    "/:id/image",
+    protect,
+    admin,
+    productController.uploadProductImage
+)
+
 // Update a product
 router.patch(
     "/:id",
