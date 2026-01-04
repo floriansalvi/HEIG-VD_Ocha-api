@@ -165,13 +165,6 @@ const getMyOrders = async (req, res) => {
     }
 };
 
-/**
- * Retrieve global order statistics.
- *
- * @param {Object} req Express request object.
- * @param {Object} res Express response object.
- * @return {Object} JSON response containing aggregated statistics.
- */
 const getOrderStats = async (req, res) => {
     try {
         const stats = await Order.aggregate([
@@ -191,7 +184,7 @@ const getOrderStats = async (req, res) => {
                 }
             },
             {
-                $unwind: "$user"
+                $unwind: { path: "$user", preserveNullAndEmptyArrays: true }
             },
             {
                 $project: {

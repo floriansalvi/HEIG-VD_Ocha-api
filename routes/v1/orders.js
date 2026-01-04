@@ -21,6 +21,14 @@ router.get(
     orderController.getMyOrders
 );
 
+// Get orders statistics
+router.get(
+    "/stats",
+    protect,
+    admin,
+    orderController.getOrderStats
+);
+
 // Get details of a specific order
 router.get(
     "/:id",
@@ -43,14 +51,6 @@ router.patch(
     protect,
     admin,
     orderController.updateOrderStatus
-);
-
-// Get orders statistics
-router.get(
-    "/stats",
-    protect,
-    admin,
-    orderController.getOrderStats
 );
 
 export default router;
