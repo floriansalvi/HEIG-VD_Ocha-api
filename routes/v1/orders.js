@@ -1,32 +1,16 @@
 import express from "express";
 import { orderController } from "../../controllers/v1/orderController.js";
+import { orderItemController } from "../../controllers/v1/orderItemController.js";
 import { protect } from "../../middleware/authMiddleware.js";
 import { admin } from "../../middleware/adminMiddleware.js";
 
 const router = express.Router();
-
-// Conected
 
 // Create a new order
 router.post(
     "/",
     protect,
     orderController.createOrder
-);
-
-// Get list of own orders
-router.get(
-    "/me",
-    protect,
-    orderController.getMyOrders
-);
-
-// Get orders statistics
-router.get(
-    "/stats",
-    protect,
-    admin,
-    orderController.getOrderStats
 );
 
 // Get details of a specific order
@@ -43,14 +27,19 @@ router.delete(
     orderController.deleteOrder
 );
 
-// Admin
-
 // Update an order status
 router.patch(
-    "/:id/status",
+    "/:id",
     protect,
     admin,
     orderController.updateOrderStatus
+);
+
+// Get items of a specific order
+router.get(
+  "/:id/items",
+  protect,
+  orderItemController.getItemsByOrder
 );
 
 export default router;

@@ -5,8 +5,6 @@ import { admin } from "../../middleware/adminMiddleware.js";
 
 const router = express.Router();
 
-// Public
-
 // List of products (filters + pagination)
 router.get(
     "/",
@@ -19,8 +17,6 @@ router.get(
     productController.getProductById
 );
 
-// Admin
-
 // Create a new product
 router.post(
     "/",
@@ -28,13 +24,6 @@ router.post(
     admin,
     productController.createProduct
 );
-
-router.post(
-    "/:id/image",
-    protect,
-    admin,
-    productController.uploadProductImage
-)
 
 // Update a product
 router.patch(
@@ -51,5 +40,13 @@ router.delete(
     admin,
     productController.deleteProduct
 );
+
+// Add or update product image
+router.put(
+    "/:id/image",
+    protect,
+    admin,
+    productController.uploadProductImage
+)
 
 export default router;

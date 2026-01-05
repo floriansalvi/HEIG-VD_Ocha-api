@@ -84,10 +84,43 @@ const createStore = async (req, res) => {
  */
 const getStores = async (req, res) => {
     try {
+        const { near, radius } = req.query;
+
+        // ---------- GEO SEARCH ----------
+        if (near) {
+            const [lat, lng] = near.split(",");
+
+            if (!lat || !lng) {
+                return res.status(400).json({
+                    message: "Invalid near parameter. Expected format: lat,lng"
+                });
+            }
+
+            const radiusInMeters = parseInt(radius) || 10000;
+
+            const stores = await Store.find({
+                location: {
+                    $near: {
+                        $geometry: {
+                            type: "Point",
+                            coordinates: [parseFloat(lng), parseFloat(lat)]
+                        },
+                        $maxDistance: radiusInMeters
+                    }
+                }
+            });
+
+            return res.status(200).json({
+                message: "Nearby stores",
+                totalStores: stores.length,
+                stores
+            });
+        }
+
+        // ---------- STANDARD PAGINATION ----------
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
-
 
         const stores = await Store.find()
             .skip(skip)
@@ -104,55 +137,11 @@ const getStores = async (req, res) => {
         });
     } catch (error) {
         return res.status(500).json({
-            message: "An error occurred :",
+            message: "An error occurred",
             error: error.message
         });
     }
 };
-
-/**
- * Retrieve nearby stores based on geographic coordinates.
- *
- * @param {Object} req Express request object.
- * @param {Object} req.query Query parameters.
- * @param {string} req.query.lat Latitude.
- * @param {string} req.query.lng Longitude.
- * @param {string} [req.query.radius] Search radius in meters.
- *
- * @param {Object} res Express response object.
- * @return {Object} JSON response containing nearby stores.
- */
-const getNearbyStores = async (req, res) => {
-    const { lat, lng, radius } = req.query;
-    if (!lat || !lng) {
-        return res.status(400).json({
-            message: "Latitude and longitude are required"
-        })
-    }
-
-    const radiusInMeters = parseInt(radius) || 10000;
-
-    try {
-        const stores = await Store.find({
-            location: {
-                $near: {
-                    $geometry: { type: "Point", coordinates: [parseFloat(lng), parseFloat(lat)] },
-                    $maxDistance: radiusInMeters
-                }
-            }
-        });
-
-        return res.status(200).json({
-            message: "Nearby stores",
-            stores
-        })
-    } catch (error) {
-        return res.status(500).json({
-            message: "An error occurred :",
-            error: error.message
-        });
-    }
-}
 
 /**
  * Retrieve a single store by its identifier.
@@ -247,7 +236,6 @@ export const storeController = {
     createStore,
     getStores,
     getStoreById,
-    getNearbyStores,
     updateStore,
     deleteStore
 };

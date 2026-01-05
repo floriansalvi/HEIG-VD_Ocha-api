@@ -19,14 +19,16 @@ import Order from "../../models/order.js";
  */
 export const getItemsByOrder = async (req, res) => {
     try {
-        const orderId = req.params.orderId;
+        const orderId = req.params.id;
 
         const order = await Order.findById(orderId);
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
 
-        const items = await OrderItem.find({ order_id: orderId }).populate("product_id");
+        const items = await OrderItem
+            .find({ order_id: orderId })
+            .populate("product_id");
 
         return res.status(200).json({
             message: "List of items in the order",

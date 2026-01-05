@@ -19,14 +19,6 @@ router.get(
     storeController.getStoreById
 );
 
-// Get nearby stores
-router.get(
-    "/nearby",
-    storeController.getNearbyStores
-);
-
-// Admin
-
 // Create a new store
 router.post(
     "/",

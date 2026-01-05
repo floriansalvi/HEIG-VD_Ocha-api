@@ -1,5 +1,6 @@
 import express from "express";
 import { authController } from "../../controllers/v1/authController.js";
+import { orderController } from "../../controllers/v1/orderController.js";
 import { validateEmail } from "../../middleware/validateEmail.js";
 import { validateDisplayName } from "../../middleware/validateDisplayName.js";
 import { validatePhone } from "../../middleware/validatePhone.js";
@@ -10,7 +11,7 @@ const router = express.Router();
 
 // Register
 router.post(
-    "/register",
+    "/",
     validateEmail,
     validateDisplayName,
     validatePhone,
@@ -18,19 +19,20 @@ router.post(
     authController.register
 );
 
-// Login
-router.post(
-    "/login",
-    authController.login
-);
-
 // Connected user profile
 router.get(
-    "/profile",
+    "/me",
     protect,
     (req, res) => {
         res.json({ user: req.user });
     }
+);
+
+// Get list of own orders
+router.get(
+    "/me/orders",
+    protect,
+    orderController.getMyOrders
 );
 
 export default router;
