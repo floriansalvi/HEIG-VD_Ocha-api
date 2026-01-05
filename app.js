@@ -3,7 +3,7 @@ import createError from "http-errors";
 import logger from "morgan";
 import mongoose, { mongo } from "mongoose";
 import dotenv from "dotenv";
-
+import cors from "cors";
 import indexRouter from "./routes/v1/index.js";
 import ordersRouter from "./routes/v1/orders.js";
 import productsRouter from "./routes/v1/products.js";
@@ -19,6 +19,9 @@ const app = express();
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// complete
+app.use(cors());
 
 app.use("/api/v1", indexRouter);
 app.use("/api/v1/orders", ordersRouter);
