@@ -33,7 +33,7 @@ export const createUserWithToken = async (userData = {}) => {
 
     // Perform login to obtain a valid JWT token
     const loginRes = await request(app)
-        .post("/api/v1/users/login")
+        .post("/api/v1/auth/login")
         .send({ email, password });
 
     return { 

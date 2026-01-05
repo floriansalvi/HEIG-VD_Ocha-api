@@ -10,23 +10,14 @@ import { createUserWithToken, createProduct, createStore } from "../helpers/inde
 // SETUP: In-Memory MongoDB
 // -------------------------
 
-/**
- * Set up the test environment before all tests.
- */
 beforeAll(async () => {
     await connectTestDb();
 });
 
-/**
- * Clean up after all tests.
- */
 afterAll(async () => {
     await closeTestDb();
 });
 
-/**
- * Clear all data from the database before each test.
- */
 beforeEach(async () => {
     await clearTestDb();
 });
@@ -42,9 +33,6 @@ describe("Order API", () => {
     let store;
     let product;
 
-    /**
-     * Create test users, store, and product before each test.
-     */
     beforeEach(async () => {
         const admin = await createUserWithToken({ role: "admin" });
         const user = await createUserWithToken({ role: "user" });
@@ -62,15 +50,6 @@ describe("Order API", () => {
     // CREATE ORDER
     // -------------------------
     describe("POST /api/v1/orders", () => {
-        /**
-         * Test: Successfully create an order with valid data.
-         * 
-         * Verifies that:
-         * - Status code is 201 (Created)
-         * - Order is created with correct user_id
-         * - Total price is calculated
-         * - OrderItems are created
-         */
         it("should create an order with valid data", async () => {
             const res = await request(app)
                 .post("/api/v1/orders")
@@ -97,9 +76,6 @@ describe("Order API", () => {
             expect(orderItems).toHaveLength(1);
         });
 
-        /**
-         * Test: Fail to create order without authentication.
-         */
         it("should fail without authentication", async () => {
             await request(app)
                 .post("/api/v1/orders")
@@ -107,9 +83,6 @@ describe("Order API", () => {
                 .expect(401);
         });
 
-        /**
-         * Test: Fail to create order with missing required fields.
-         */
         it("should fail with missing required fields", async () => {
             const res = await request(app)
                 .post("/api/v1/orders")
@@ -120,9 +93,6 @@ describe("Order API", () => {
             expect(res.body.message).toContain("store_id");
         });
 
-        /**
-         * Test: Fail to create order if store does not exist.
-         */
         it("should fail if store does not exist", async () => {
             const fakeId = new mongoose.Types.ObjectId();
 
@@ -146,15 +116,12 @@ describe("Order API", () => {
     });
 
     // -------------------------
-    // GET MY ORDERS
+    // GET MY ORDERS (via users route)
     // -------------------------
-    describe("GET /api/v1/orders/me", () => {
-        /**
-         * Test: Return empty list when user has no orders.
-         */
+    describe("GET /api/v1/users/me/orders", () => {
         it("should return empty list when user has no orders", async () => {
             const res = await request(app)
-                .get("/api/v1/orders/me")
+                .get("/api/v1/users/me/orders")
                 .set("Authorization", `Bearer ${userToken}`)
                 .expect(200);
 
@@ -162,13 +129,6 @@ describe("Order API", () => {
             expect(res.body.totalOrders).toBe(0);
         });
 
-        /**
-         * Test: Return only the authenticated user's orders.
-         * 
-         * Verifies that:
-         * - User sees only their own orders
-         * - Other users' orders are not included
-         */
         it("should return user's orders only", async () => {
             await Order.create({
                 user_id: normalUser._id,
@@ -185,7 +145,7 @@ describe("Order API", () => {
             });
 
             const res = await request(app)
-                .get("/api/v1/orders/me")
+                .get("/api/v1/users/me/orders")
                 .set("Authorization", `Bearer ${userToken}`)
                 .expect(200);
 
@@ -193,12 +153,9 @@ describe("Order API", () => {
             expect(res.body.orders[0].user_id).toBe(normalUser._id.toString());
         });
 
-        /**
-         * Test: Fail without authentication.
-         */
         it("should fail without authentication", async () => {
             await request(app)
-                .get("/api/v1/orders/me")
+                .get("/api/v1/users/me/orders")
                 .expect(401);
         });
     });
@@ -207,9 +164,6 @@ describe("Order API", () => {
     // GET ORDER BY ID
     // -------------------------
     describe("GET /api/v1/orders/:id", () => {
-        /**
-         * Test: Retrieve a single order by its ID.
-         */
         it("should retrieve an order by id", async () => {
             const order = await Order.create({
                 user_id: normalUser._id,
@@ -226,9 +180,6 @@ describe("Order API", () => {
             expect(res.body.order._id).toBe(order._id.toString());
         });
 
-        /**
-         * Test: Return 404 for non-existent order.
-         */
         it("should return 404 for non-existent order", async () => {
             const fakeId = new mongoose.Types.ObjectId();
 
@@ -240,9 +191,6 @@ describe("Order API", () => {
             expect(res.body.message).toBe("Order not found");
         });
 
-        /**
-         * Test: Return 400 for invalid ID format.
-         */
         it("should return 400 for invalid id format", async () => {
             const res = await request(app)
                 .get("/api/v1/orders/invalid-id")
@@ -256,10 +204,7 @@ describe("Order API", () => {
     // -------------------------
     // UPDATE ORDER STATUS (ADMIN)
     // -------------------------
-    describe("PATCH /api/v1/orders/:id/status", () => {
-        /**
-         * Test: Admin can update order status.
-         */
+    describe("PATCH /api/v1/orders/:id", () => {
         it("should update order status as admin", async () => {
             const order = await Order.create({
                 user_id: normalUser._id,
@@ -269,7 +214,7 @@ describe("Order API", () => {
             });
 
             const res = await request(app)
-                .patch(`/api/v1/orders/${order._id}/status`)
+                .patch(`/api/v1/orders/${order._id}`)
                 .set("Authorization", `Bearer ${adminToken}`)
                 .send({ status: "prête" })
                 .expect(200);
@@ -277,9 +222,6 @@ describe("Order API", () => {
             expect(res.body.order.status).toBe("prête");
         });
 
-        /**
-         * Test: Non-admin user cannot update order status.
-         */
         it("should fail for non-admin user", async () => {
             const order = await Order.create({
                 user_id: normalUser._id,
@@ -289,7 +231,7 @@ describe("Order API", () => {
             });
 
             await request(app)
-                .patch(`/api/v1/orders/${order._id}/status`)
+                .patch(`/api/v1/orders/${order._id}`)
                 .set("Authorization", `Bearer ${userToken}`)
                 .send({ status: "prête" })
                 .expect(403);
@@ -299,10 +241,7 @@ describe("Order API", () => {
     // -------------------------
     // GET ORDER STATS (ADMIN)
     // -------------------------
-    describe("GET /api/v1/orders/stats", () => {
-        /**
-         * Test: Admin can retrieve order statistics.
-         */
+    describe("GET /api/v1/order-stats", () => {
         it("should return order statistics for admin", async () => {
             await Order.create({
                 user_id: normalUser._id,
@@ -312,7 +251,7 @@ describe("Order API", () => {
             });
 
             const res = await request(app)
-                .get("/api/v1/orders/stats")
+                .get("/api/v1/order-stats")
                 .set("Authorization", `Bearer ${adminToken}`)
                 .expect(200);
 
@@ -320,12 +259,9 @@ describe("Order API", () => {
             expect(res.body.stats[0]).toHaveProperty("totalOrders");
         });
 
-        /**
-         * Test: Non-admin user cannot access statistics.
-         */
         it("should fail for non-admin user", async () => {
             await request(app)
-                .get("/api/v1/orders/stats")
+                .get("/api/v1/order-stats")
                 .set("Authorization", `Bearer ${userToken}`)
                 .expect(403);
         });
@@ -335,13 +271,6 @@ describe("Order API", () => {
     // DELETE ORDER
     // -------------------------
     describe("DELETE /api/v1/orders/:id", () => {
-        /**
-         * Test: Successfully delete an order and its associated items.
-         * 
-         * Verifies that:
-         * - Order is deleted from database
-         * - Associated OrderItems are also deleted
-         */
         it("should delete an order and its items", async () => {
             const order = await Order.create({
                 user_id: normalUser._id,
@@ -368,9 +297,6 @@ describe("Order API", () => {
             expect(deletedItems).toHaveLength(0);
         });
 
-        /**
-         * Test: Return 404 when deleting non-existent order.
-         */
         it("should return 404 for non-existent order", async () => {
             const fakeId = new mongoose.Types.ObjectId();
 

@@ -12,7 +12,6 @@ import authRouter from "./routes/v1/auth.js";
 import usersRouter from "./routes/v1/users.js";
 import orderStatsRouter from "./routes/v1/orderStats.js";
 
-
 dotenv.config();
 
 const app = express();
