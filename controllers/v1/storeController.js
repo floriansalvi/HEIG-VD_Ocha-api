@@ -86,11 +86,11 @@ const getStores = async (req, res) => {
     try {
         const { near, radius } = req.query;
 
-        // ---------- GEO SEARCH ----------
+        // Geospatial query for nearby stores
         if (near) {
-            const [lat, lng] = near.split(",");
+            const [lng, lat] = near.split(",");
 
-            if (!lat || !lng) {
+            if (!lng || !lat) {
                 return res.status(400).json({
                     message: "Invalid near parameter. Expected format: lat,lng"
                 });
@@ -117,7 +117,7 @@ const getStores = async (req, res) => {
             });
         }
 
-        // ---------- STANDARD PAGINATION ----------
+        // Standard paginated listing
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
