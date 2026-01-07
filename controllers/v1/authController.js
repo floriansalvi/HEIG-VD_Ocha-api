@@ -82,7 +82,13 @@ const register = async (req, res) => {
  */
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body || {};
+
+        if (!email || !password) {
+            return res.status(400).json({
+                message: "Email and password required"
+            });
+        }
 
         const user = await User.findOne({ email }).select('+password');
         if (!user) {
@@ -110,6 +116,7 @@ const login = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error("Login error:", error);
         return res.status(500).json({
             message: "An unexpected error occurred",
         });
