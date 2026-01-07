@@ -84,9 +84,14 @@ const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // supprimer :
         console.log(email, password)
 
         const user = await User.findOne({ email }).select('+password');
+
+        //supprimer :
+        console.log("User from DB:", user);
+
         if (!user) {
             return res.status(401).json({
                 message: "Email or password incorrect"
@@ -94,6 +99,10 @@ const login = async (req, res) => {
         }
 
         const isMatch = await user.comparePassword(password);
+
+        //supprimer :
+        console.log("DB match:", isMatch);
+
         if (!isMatch) {
             return res.status(401).json({
                 message: "Email or password incorrect"
