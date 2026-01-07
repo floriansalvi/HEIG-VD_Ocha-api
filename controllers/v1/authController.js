@@ -59,8 +59,7 @@ const register = async (req, res) => {
         });
     } catch (error) {
         return res.status(500).json({
-            message: "An error occurred : ",
-            error: error.message
+            message: "An unexpected error occurred",
         });
     }
 };
@@ -84,6 +83,8 @@ const register = async (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        console.log(email, password)
 
         const user = await User.findOne({ email }).select('+password');
         if (!user) {
@@ -112,8 +113,7 @@ const login = async (req, res) => {
         });
     } catch (error) {
         return res.status(500).json({
-            message: "An error occurred : ",
-            error: error.message
+            message: "An unexpected error occurred",
         });
     }
 };

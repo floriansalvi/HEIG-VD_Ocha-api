@@ -17,6 +17,7 @@ import User from "../models/user.js";
  * @return {void} Either calls `next()` or sends a 401 JSON response
  */
 export const protect = async (req, res, next) => {
+    
     let token;
 
     if (
@@ -28,7 +29,7 @@ export const protect = async (req, res, next) => {
 
     if (!token) {
         return res.status(401).json({
-            message: 'Unauthorized, token missing'
+            message: 'Token missing'
         });
     }
 

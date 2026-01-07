@@ -20,6 +20,12 @@ import User from "../models/user.js";
  */
 export const validateDisplayName = async (req, res, next) => {
     try {
+        if (!req.body) {
+            return res.status(400).json({
+                message: "Request body is missing"
+            });
+        }
+
         const { display_name } = req.body;
 
         if (!display_name || display_name.trim() === "") {
@@ -47,14 +53,13 @@ export const validateDisplayName = async (req, res, next) => {
         const existing = await User.findOne({ display_name: cleanedDisplayName });
         if (existing) {
             return res.status(409).json({
-                message: "Display name already used"
+                message: "Display name already in use"
             });
         }
         next();
     } catch (error) {
         return res.status(500).json({
-            message: "Error during display name validation",
-            error: error.message
+            message: "An unexpected error occurred",
         });
     }
 };

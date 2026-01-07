@@ -17,6 +17,12 @@ import User from "../models/user.js";
  */
 export const validatePassword = (req, res, next) => {
     try {
+        if (!req.body) {
+            return res.status(400).json({
+                message: "Request body is missing"
+            });
+        }
+
         const { password } = req.body;
 
         if (!password || password.trim() === "") {
@@ -45,8 +51,7 @@ export const validatePassword = (req, res, next) => {
         next();
     } catch (error) {
         return res.status(500).json({
-            message: "Error during password validation",
-            error: error.message
+            message: "An unexpected error occurred",
         });
     }
 };
