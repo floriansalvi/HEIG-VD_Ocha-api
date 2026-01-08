@@ -98,13 +98,6 @@ const login = async (req, res) => {
             });
         }
 
-        // debug logs
-        console.log("Password : ", password);
-        console.log("User password : ", user.password);
-        console.log("bcrypt : ",await bcrypt.compare(password, user.password));
-        console.log("User comparePassword method : ", user.comparePassword);
-        console.log("User comparePassword results : ", user.comparePassword(password));
-
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({
