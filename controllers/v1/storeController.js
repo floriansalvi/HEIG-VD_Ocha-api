@@ -23,8 +23,7 @@ const handleMongooseError = (res, error) => {
     }
 
     return res.status(500).json({
-        message: "An error occurred :",
-        error: error.message
+        message: "An unexpected error occurred"
     });
 };
 
@@ -84,7 +83,11 @@ const createStore = async (req, res) => {
  */
 const getStores = async (req, res) => {
     try {
-        const { near, radius } = req.query;
+        const { near, radius, page = 1, limit = 10 } = req.query;
+
+        const pageNumber = parseInt(page);
+        const limitNumber = parseInt(limit);
+        const skip = (pageNumber - 1) * limitNumber;
 
         // Geospatial query for nearby stores
         if (near) {
@@ -92,7 +95,7 @@ const getStores = async (req, res) => {
 
             if (!lng || !lat) {
                 return res.status(400).json({
-                    message: "Invalid near parameter. Expected format: lat,lng"
+                    message: "Invalid near parameter. Expected format: lng,lat"
                 });
             }
 
@@ -108,37 +111,47 @@ const getStores = async (req, res) => {
                         $maxDistance: radiusInMeters
                     }
                 }
+            })
+            .skip(skip)
+            .limit(limitNumber);
+
+            const totalStores = await Store.countDocuments({
+                location: {
+                    $near: {
+                        $geometry: {
+                            type: "Point",
+                            coordinates: [parseFloat(lng), parseFloat(lat)]
+                        },
+                        $maxDistance: radiusInMeters
+                    }
+                }
             });
 
             return res.status(200).json({
                 message: "Nearby stores",
-                totalStores: stores.length,
+                page: pageNumber,
+                totalPages: Math.ceil(totalStores / limitNumber),
+                totalStores,
                 stores
             });
         }
 
-        // Standard paginated listing
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
-
         const stores = await Store.find()
             .skip(skip)
-            .limit(limit);
+            .limit(limitNumber);
 
         const totalStores = await Store.countDocuments();
 
         return res.status(200).json({
             message: "List of stores",
-            page,
-            totalPages: Math.ceil(totalStores / limit),
+            page: pageNumber,
+            totalPages: Math.ceil(totalStores / limitNumber),
             totalStores,
             stores
         });
     } catch (error) {
         return res.status(500).json({
-            message: "An error occurred",
-            error: error.message
+            message: "An unexpected error occurred"
         });
     }
 };

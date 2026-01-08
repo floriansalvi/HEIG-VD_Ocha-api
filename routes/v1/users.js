@@ -59,7 +59,8 @@ router.get(
  * @apiQuery {Number} [limit=10] Number of orders per page
  *
  * @apiExample {curl} Example usage:
- *   curl -X GET "https://api.example.com/auth/me/orders?page=1&limit=5" -H "Authorization: Bearer YOUR_TOKEN_HERE"
+ *  GET /users/orders?status=pending&page=1&limit=5
+ *  Authorization: Bearer YOUR_TOKEN_HERE
  *
  * @apiSuccess (200) {String} message Success message
  * @apiSuccess (200) {Number} page Current page number

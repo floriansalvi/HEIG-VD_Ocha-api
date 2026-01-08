@@ -21,7 +21,7 @@ const router = express.Router();
  * @apiBody {String} [phone] Optional phone number (min 8 digits)
  * 
  * @apiExample request example:
- *  POST /api/v1/users
+ *  POST /api/v1/auth
  *  Content-Type: application/json
  *  Body: {
  *    "email":"test@example.com",

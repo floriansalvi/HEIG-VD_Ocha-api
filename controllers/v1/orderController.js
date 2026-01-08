@@ -25,8 +25,7 @@ const handleMongooseError = (res, error) => {
     }
 
     return res.status(500).json({
-        message: "An error occurred :",
-        error: error.message
+        message: "An unexpected error occurred",
     });
 };
 
@@ -159,8 +158,7 @@ const getMyOrders = async (req, res) => {
         });
     } catch (error) {
         return res.status(500).json({
-            message: "An error occurred :",
-            error: error.message
+            message: "An unexpected error occurred"
         });
     }
 };

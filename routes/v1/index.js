@@ -9,6 +9,9 @@ const router = express.Router();
  *
  * @apiDescription
  * Simple endpoint to check if the API server is running.
+ * 
+ * @apiExample request example:
+ *  GET /api/v1/health
  *
  * @apiSuccess (200) {String} message Server response message
  *
