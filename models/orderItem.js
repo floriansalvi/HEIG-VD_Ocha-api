@@ -12,8 +12,14 @@ const orderItemSchema = new mongoose.Schema({
         required: true
     },
     product_name: {
-        type: String,  // snapshot du nom du produit
+        type: String,
         required: true
+    },
+    quantity: {
+        type: Number,
+        default: 1,
+        min: 1,
+        max: 100
     },
     size: {
         type: String,

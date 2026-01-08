@@ -58,7 +58,7 @@ router.get(
  * @apiQuery {Number} [page=1] Page number for pagination
  * @apiQuery {Number} [limit=10] Number of orders per page
  *
- * @apiExample {curl} Example usage:
+ * @apiExample Request example:
  *  GET /users/orders?status=pending&page=1&limit=5
  *  Authorization: Bearer YOUR_TOKEN_HERE
  *

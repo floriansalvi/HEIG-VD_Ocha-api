@@ -1,9 +1,9 @@
 import express from "express";
+import { authController } from "../../controllers/v1/authController.js";
 import { validateEmail } from "../../middleware/validateEmail.js";
 import { validateDisplayName } from "../../middleware/validateDisplayName.js";
 import { validatePhone } from "../../middleware/validatePhone.js";
 import { validatePassword } from "../../middleware/validatePassword.js";
-import { authController } from "../../controllers/v1/authController.js";
 
 const router = express.Router();
 

@@ -77,18 +77,19 @@ const createOrder = async (req, res) => {
         let total = 0;
 
         for (const item of items) {
-            const { product_id, size } = item;
+            const { product_id, size, quantity } = item;
 
-            if (!product_id || !size) {
+            if (!product_id || !size || !quantity) {
                 return res.status(400).json({
-                    message: "Each item must contain product_id and size"
+                    message: "Each item must contain product_id, size and quantity"
                 });
             }
 
             const orderItem = new OrderItem({
                 order_id: order._id,
                 product_id,
-                size
+                size,
+                quantity
             });
 
             await orderItem.save();
