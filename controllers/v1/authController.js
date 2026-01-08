@@ -24,7 +24,7 @@ const register = async (req, res) => {
     try {
         const { email, password, display_name, phone } = req.body;
 
-        const existingEmail = await User.findOne({ email });
+        const existingEmail = await User.findOne({ email: email.toLowerCase() });
         if (existingEmail) {
             return res.status(409).json({
                 message: "Email already in use"
@@ -91,12 +91,19 @@ const login = async (req, res) => {
             });
         }
 
-        const user = await User.findOne({ email }).select('+password');
+        const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
         if (!user) {
             return res.status(401).json({
                 message: "Email or password incorrect"
             });
         }
+
+        // debug logs
+        console.log("Password : ", password);
+        console.log("User password : ", user.password);
+        console.log("bcrypt : ",await bcrypt.compare(password, user.password));
+        console.log("User comparePassword method : ", user.comparePassword);
+        console.log("User comparePassword results : ", user.comparePassword(password));
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
