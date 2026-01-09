@@ -57,6 +57,7 @@ const getOrderStats = async (req, res) => {
             {
                 $project: {
                     _id: 0,
+                    userId: "$_id",
                     user: "$user.display_name",
                     totalOrders: 1,
                     totalSpent: { $round: ["$totalSpent", 2] }
