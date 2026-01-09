@@ -61,7 +61,6 @@ router.get(
  *  GET /users/orders?status=pending&page=1&limit=5
  *  Authorization: Bearer YOUR_TOKEN_HERE
  *
- * @apiSuccess (200) {String} message Success message
  * @apiSuccess (200) {Number} page Current page number
  * @apiSuccess (200) {Number} totalPages Total number of pages
  * @apiSuccess (200) {Number} totalOrders Total number of orders

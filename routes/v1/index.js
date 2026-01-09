@@ -8,7 +8,7 @@ const router = express.Router();
  * @apiGroup System
  *
  * @apiDescription
- * Simple endpoint to check if the API server is running.
+ * Simple endpoint that checks if the API server is running.
  * 
  * @apiExample request example:
  *  GET /api/v1/health

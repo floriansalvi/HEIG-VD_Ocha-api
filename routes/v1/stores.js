@@ -27,10 +27,12 @@ const router = express.Router();
  *  GET /stores?near=6.93,46.99&radius=5000
  *
  * @apiSuccess (200) {String} message Response message
+ * @apiSuccess (200) {Number} page Current page
+ * @apiSuccess (200) {Number} totalPages Total number of pages
  * @apiSuccess (200) {Number} totalStores Total number of stores
  * @apiSuccess (200) {Object[]} stores List of stores
  *
- * @apiError (400) BadRequest Invalid near parameter. Expected format: lng,lat
+ * @apiError (400) BadRequest Invalid query or request parameters
  * @apiError (500) InternalServerError Unexpected server error
  */
 router.get(
@@ -52,7 +54,6 @@ router.get(
  * @apiSuccess (200) {Object} store Store data
  *
  * @apiError (404) NotFound Store not found
- * @apiError (400) BadRequest Invalid store ID
  * @apiError (500) InternalServerError An unexpected error occurred
 
  */
@@ -75,19 +76,15 @@ router.get(
  * @apiBody {String} name Store name (3–50 characters, unique)
  * @apiBody {String} email Store email (valid email, unique)
  * @apiBody {String} [phone] Store phone number (international format)
- *
  * @apiBody {Object} address Store address
  * @apiBody {String} address.line1 Street address
  * @apiBody {String} address.city City
  * @apiBody {String} address.zipcode ZIP or postal code
  * @apiBody {String} address.country Country
- *
  * @apiBody {Object} location GeoJSON location
  * @apiBody {String="Point"} location.type GeoJSON type (must be "Point")
  * @apiBody {Number[]} location.coordinates Longitude and latitude [lng, lat]
- *
- * @apiBody {String[][]} [opening_hours]
- * Weekly opening hours.
+ * @apiBody {String[][]} [opening_hours] Weekly opening hours
  * Array of 7 elements (Sunday to Saturday).
  * Each day is either [] (closed) or ["HH:MM", "HH:MM"].
  *
@@ -123,12 +120,12 @@ router.get(
  * @apiSuccess (201) {String} message Response message
  * @apiSuccess (201) {Object} store Created store
  *
- * @apiError (400) BadRequest Missing required fields
+ * @apiError (400) BadRequest Missing or invalid fields
  * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
- * @apiError (409) Conflict Email already in use
- * @apiError (422) Unprocessable Entity Validation error
- * @apiError (500) InternalServerError An unexpected error occurred
+ * @apiError (409) Conflict Store with same name or email exists
+ * @apiError (422) UnprocessableEntity Validation error
+ * @apiError (500) InternalServerError Unexpected server error
  */
 router.post(
     "/",
@@ -162,13 +159,12 @@ router.post(
  * @apiSuccess (200) {String} message Success message
  * @apiSuccess (200) {Object} store Updated store
  *
- * @apiError (400) BadRequest Invalid request
- * @apiError (401) Unauthorized Authentication required
+ * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
  * @apiError (404) NotFound Store not found
- * @apiError (409) Conflict Email already in use
+ * @apiError (409) Conflict Store with same email or name exists
  * @apiError (422) UnprocessableEntity Validation error
- * @apiError (500) InternalServerError An unexpected error occurred
+ * @apiError (500) InternalServerError Unexpected server error
  */
 router.patch(
     "/:id",
@@ -192,10 +188,10 @@ router.patch(
  *
  * @apiSuccess (204) NoContent Store successfully deleted
  *
- * @apiError (401) Unauthorized Authentication required
+ * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
  * @apiError (404) NotFound Store not found
- * @apiError (500) InternalServerError An unexpected error occurred
+ * @apiError (500) InternalServerError Unexpected server error
  */
 router.delete(
     "/:id",

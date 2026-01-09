@@ -11,7 +11,7 @@ const router = express.Router();
  * @apiGroup Statistics
  *
  * @apiDescription
- * Retrieves aggregated order statistics per user.
+ * Retrieves order statistics per user.
  * Requires authentication and administrator privileges.
  *
  * Statistics include:

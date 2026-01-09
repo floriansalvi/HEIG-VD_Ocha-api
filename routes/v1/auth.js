@@ -25,7 +25,7 @@ const router = express.Router();
  *  Content-Type: application/json
  *  Body: {
  *    "email":"test@example.com",
- *    "password":"Password_123",
+ *    "password":"Password_123?",
  *    "display_name":"test_user",
  *    "phone":"12345678"
  *  }
@@ -37,8 +37,9 @@ const router = express.Router();
  * @apiSuccess (201) {String} user.email User email address
  * @apiSuccess (201) {String} user.display_name User display name
  *
- * @apiError (400) BadRequest Request body is missing or validation error for email, password, display_name, or phone
+ * @apiError (400) BadRequest Request body is missing or invalid
  * @apiError (409) Conflict Email or display_name already in use
+ * @apiError (422) UnprocessableEntity Validation failed (invalid fields)
  * @apiError (500) InternalServerError An unexpected error occurred
  */
 router.post(
@@ -77,7 +78,7 @@ router.post(
  * @apiSuccess (200) {String} user.email User email address
  * @apiSuccess (200) {String} user.display_name User display name
  *
- * @apiError (400) BadRequest Email and password required
+ * @apiError (400) BadRequest Request body missing or invalid
  * @apiError (401) Unauthorized Email or password incorrect
  * @apiError (500) InternalServerError An unexpected error occurred
  */

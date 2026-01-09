@@ -19,6 +19,10 @@ const router = express.Router();
  * @apiQuery {Boolean} [active] Filter active products only
  *
  * @apiExample Request example:
+ *  GET /products
+ * @apiExample Request example:
+ *  GET /products?active=true
+ * @apiExample Request example:
  *  GET /products?page=1&limit=10
  *
  * @apiSuccess (200) {String} message Response message
@@ -75,11 +79,11 @@ router.get(
  *  POST /products
  *  Authorization: Bearer ADMIN_TOKEN
  *  Content-Type: application/json
- *  Body: {
- *      "name": "Green Tea",
- *      "price": 4.50,
- *      "description": "Organic green tea"
- *  }
+ *      Body: {
+ *          "name": "Matcha Latte",
+ *          "price": 5.00,
+ *          "description": "Delicious matcha latte with a hint of sweetness."
+ *      }
  *
  * @apiSuccess (201) {String} message Response message
  * @apiSuccess (201) {Object} product Created product
@@ -87,6 +91,8 @@ router.get(
  * @apiError (400) BadRequest Missing or invalid fields
  * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
+ * @apiError (409) Conflict Product with same name already exists
+ * @apiError (422) UnprocessableEntity Validation error
  * @apiError (500) InternalServerError An unexpected error occurred
  */
 router.post(
@@ -127,10 +133,11 @@ router.post(
  * @apiSuccess (200) {String} message Response message
  * @apiSuccess (200) {Object} product Updated product
  *
- * @apiError (400) BadRequest Invalid request
- * @apiError (401) Unauthorized Authentication required
+ * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
  * @apiError (404) NotFound Product not found
+ * @apiError (409) Conflict Product with same name already exists
+ * @apiError (422) UnprocessableEntity Validation error
  * @apiError (500) InternalServerError An unexpected error occurred
  */
 router.patch(
@@ -159,7 +166,7 @@ router.patch(
  *
  * @apiSuccess (204) NoContent Product successfully deleted
  *
- * @apiError (401) Unauthorized Authentication required
+ * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
  * @apiError (404) NotFound Product not found
  * @apiError (500) InternalServerError An unexpected error occurred
@@ -198,9 +205,10 @@ router.delete(
  * @apiSuccess (200) {Object} product Updated product
  *
  * @apiError (400) BadRequest Invalid file or request
- * @apiError (401) Unauthorized Authentication required
+ * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
  * @apiError (404) NotFound Product not found
+ * @apiError (422) UnprocessableEntity Validation error
  * @apiError (500) InternalServerError An unexpected error occurred
  */
 router.put(

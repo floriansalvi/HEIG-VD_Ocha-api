@@ -33,7 +33,7 @@ const productSchema = new mongoose.Schema({
         default: true
     },
     image: {
-        type: String, //chaine de caractère qui pointe vers l'image
+        type: String,
         required: [ true, 'image requise' ],
     },
     size: {
