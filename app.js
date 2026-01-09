@@ -4,6 +4,9 @@ import logger from "morgan";
 import mongoose, { mongo } from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import yaml from "js-yaml";
+import fs from "fs";
+import swaggerUi from "swagger-ui-express";
 import indexRouter from "./routes/v1/index.js";
 import ordersRouter from "./routes/v1/orders.js";
 import productsRouter from "./routes/v1/products.js";
@@ -22,6 +25,9 @@ app.use(express.urlencoded({ extended: false }));
 
 // complete
 app.use(cors());
+
+const openApiDocument = yaml.load(fs.readFileSync("./docs/v1/openapi.yml", "utf8"));
+app.use("/api/v1/api-docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 app.use("/api/v1", indexRouter);
 app.use("/api/v1/orders", ordersRouter);
@@ -53,7 +59,4 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch(err => console.error("Could not connect to MongoDB...", err));
 
-//Start the server
-// const PORT = process.env.PORT || 3000;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 export default app;
