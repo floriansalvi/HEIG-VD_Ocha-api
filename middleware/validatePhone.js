@@ -32,7 +32,7 @@ export const validatePhone = async (req, res, next) => {
         const cleanedPhone = phone.replace(/[^\d]/g, "");
 
         if (!cleanedPhone || cleanedPhone.length < 8) {
-            return res.status(400).json({
+            return res.status(422).json({
                 message: "Invalid phone number"
             });
         }

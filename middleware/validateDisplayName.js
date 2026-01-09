@@ -38,14 +38,14 @@ export const validateDisplayName = async (req, res, next) => {
         req.body.display_name = cleanedDisplayName;
 
         if (cleanedDisplayName.length < 3 || cleanedDisplayName.length > 30) {
-            return res.status(400).json({
+            return res.status(422).json({
                 message: "Display name must be between 3 and 30 characters"
             });
         }
 
         const displayNameRegex = /^[a-zA-Z0-9_]+$/;
         if(!displayNameRegex.test(cleanedDisplayName)) {
-            return res.status(400).json({
+            return res.status(422).json({
                 message: "Display name can only contain letters, numbers, and underscores"
             });
         }

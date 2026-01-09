@@ -21,10 +21,8 @@ const router = express.Router();
  *
  * @apiExample Request example:
  *  GET /stores
- * 
  * @apiExample Request example:
  *  GET /stores?page=1&limit=5
- * 
  * @apiExample Request example:
  *  GET /stores?near=6.93,46.99&radius=5000
  *
@@ -32,69 +30,7 @@ const router = express.Router();
  * @apiSuccess (200) {Number} totalStores Total number of stores
  * @apiSuccess (200) {Object[]} stores List of stores
  *
- * @apiSuccessExample {json} Success response:
- *  HTTP/1.1 200 OK
- *      {
- *          "message": "List of stores",
- *          "page": 1,
- *          "totalPages": 1,
- *          "totalStores": 1,
- *          "stores": [
-                {
-                    "address": {
-                        "line1": "Rue de Genève 21",
-                        "city": "Lausanne",
-                        "zipcode": "1003",
-                        "country": "Suisse"
-                    },
-                    "location": {
-                        "type": "Point",
-                        "coordinates": [
-                            6.629,
-                            46.522
-                        ]
-                    },
-                    "_id": "695e520d173af7481ecbfad5",
-                    "name": "Ocha Lausanne Flon",
-                    "slug": "ocha-lausanne-flon",
-                    "phone": "+41214445566",
-                    "email": "lausanne-flon@ocha.ch",
-                    "is_active": true,
-                    "opening_hours": [
-                        [],
-                        [
-                            "09:00",
-                            "18:30"
-                        ],
-                        [
-                            "09:00",
-                            "18:30"
-                        ],
-                        [
-                            "09:00",
-                            "18:30"
-                        ],
-                        [
-                            "09:00",
-                            "20:00"
-                        ],
-                        [
-                            "09:00",
-                            "20:00"
-                        ],
-                        [
-                            "10:00",
-                            "18:00"
-                        ]
-                    ],
-                    "created_at": "2026-01-07T12:31:09.893Z",
-                    "updated_at": "2026-01-07T12:31:09.893Z",
-                    "__v": 0
-                }
-            ]
- *      }
- *
- * @apiError (400) BadRequest Invalid near parameter. Expected format: lat,lng
+ * @apiError (400) BadRequest Invalid near parameter. Expected format: lng,lat
  * @apiError (500) InternalServerError Unexpected server error
  */
 router.get(
@@ -115,72 +51,85 @@ router.get(
  * @apiSuccess (200) {String} message Response message
  * @apiSuccess (200) {Object} store Store data
  *
- * @apiSuccessExample {json} Success response:
- *  HTTP/1.1 200 OK
- *      {
-            "message": "Store found",
-            "store": {
-                "address": {
-                    "line1": "Rue du Rhône 12",
-                    "city": "Genève",
-                    "zipcode": "1204",
-                    "country": "Suisse"
-                },
-                "location": {
-                    "type": "Point",
-                    "coordinates": [
-                        6.149,
-                        46.203
-                    ]
-                },
-                "_id": "695e520d173af7481ecbfad6",
-                "name": "Ocha Genève Rive",
-                "slug": "ocha-geneve-rive",
-                "phone": "+41225556677",
-                "email": "geneve-rive@ocha.ch",
-                "is_active": true,
-                "opening_hours": [
-                    [],
-                    [
-                        "09:30",
-                        "19:00"
-                    ],
-                    [
-                        "09:30",
-                        "19:00"
-                    ],
-                    [
-                        "09:30",
-                        "19:00"
-                    ],
-                    [
-                        "09:30",
-                        "20:00"
-                    ],
-                    [
-                        "09:30",
-                        "20:00"
-                    ],
-                    [
-                        "10:00",
-                        "18:30"
-                    ]
-                ],
-                "created_at": "2026-01-07T12:31:09.895Z",
-                "updated_at": "2026-01-07T12:31:09.895Z",
-                "__v": 0
-            }
-        }
- *
  * @apiError (404) NotFound Store not found
- * @apiError (400) InvalidId Invalid store ID
+ * @apiError (400) BadRequest Invalid store ID
+ * @apiError (500) InternalServerError An unexpected error occurred
+
  */
 router.get(
     "/:id",
     storeController.getStoreById
 );
 
-// Create a new store
+/**
+ * @api {post} /stores Create store
+ * @apiName CreateStore
+ * @apiGroup Stores
+ *
+ * @apiDescription
+ * Creates a new store.
+ * Requires authentication and admin role.
+ *
+ * @apiHeader {String} Authorization Bearer token
+ *
+ * @apiBody {String} name Store name (3–50 characters, unique)
+ * @apiBody {String} email Store email (valid email, unique)
+ * @apiBody {String} [phone] Store phone number (international format)
+ *
+ * @apiBody {Object} address Store address
+ * @apiBody {String} address.line1 Street address
+ * @apiBody {String} address.city City
+ * @apiBody {String} address.zipcode ZIP or postal code
+ * @apiBody {String} address.country Country
+ *
+ * @apiBody {Object} location GeoJSON location
+ * @apiBody {String="Point"} location.type GeoJSON type (must be "Point")
+ * @apiBody {Number[]} location.coordinates Longitude and latitude [lng, lat]
+ *
+ * @apiBody {String[][]} [opening_hours]
+ * Weekly opening hours.
+ * Array of 7 elements (Sunday to Saturday).
+ * Each day is either [] (closed) or ["HH:MM", "HH:MM"].
+ *
+ * @apiExample Request example:
+ *  POST /stores
+ *      Authorization: Bearer ADMIN_TOKEN
+ *      Content-Type: application/json
+ *      Body: {
+ *          "name": "Ocha Neuchâtel",
+ *          "email": "neuchatel@ocha.ch",
+ *          "phone": "12345678", 
+ *          "address": {
+ *             "line1": "Avenue de la Gare 1",
+ *              "city": "Neuchâtel",
+ *              "zipcode": "2000",
+ *              "country": "Suisse"
+ *          },
+ *          "location": {
+ *              "type": "Point",
+ *              "coordinates": [6.93, 46.99]
+ *          },
+ *          "opening_hours": [
+ *              [],
+ *              ["08:00", "18:00"],
+ *              ["08:00", "18:00"],
+ *              ["08:00", "18:00"],
+ *              ["08:00", "20:00"],
+ *              ["08:00", "20:00"],  
+ *              ["09:00", "17:00"]
+ *         ]
+ *      }
+ *
+ * @apiSuccess (201) {String} message Response message
+ * @apiSuccess (201) {Object} store Created store
+ *
+ * @apiError (400) BadRequest Missing required fields
+ * @apiError (401) Unauthorized Missing or invalid token
+ * @apiError (403) Forbidden Admin access required
+ * @apiError (409) Conflict Email already in use
+ * @apiError (422) Unprocessable Entity Validation error
+ * @apiError (500) InternalServerError An unexpected error occurred
+ */
 router.post(
     "/",
     protect,
@@ -188,7 +137,39 @@ router.post(
     storeController.createStore
 );
 
-// Update a store
+/**
+ * @api {patch} /stores/:id Update store
+ * @apiName UpdateStore
+ * @apiGroup Stores
+ *
+ * @apiDescription
+ * Updates an existing store.
+ * Only predefined fields can be updated.
+ * Requires authentication and administrator privileges.
+ *
+ * @apiHeader {String} Authorization Bearer JWT token
+ *
+ * @apiParam {String} id Store unique identifier
+ *
+ * @apiBody {String} [name] Store name
+ * @apiBody {String} [email] Store email
+ * @apiBody {String} [phone] Store phone number
+ * @apiBody {Object} [address] Store address
+ * @apiBody {Object} [location] Store location
+ * @apiBody {String[][]} [opening_hours] Weekly opening hours
+ * @apiBody {Boolean} [is_active] Store active status
+ *
+ * @apiSuccess (200) {String} message Success message
+ * @apiSuccess (200) {Object} store Updated store
+ *
+ * @apiError (400) BadRequest Invalid request
+ * @apiError (401) Unauthorized Authentication required
+ * @apiError (403) Forbidden Admin access required
+ * @apiError (404) NotFound Store not found
+ * @apiError (409) Conflict Email already in use
+ * @apiError (422) UnprocessableEntity Validation error
+ * @apiError (500) InternalServerError An unexpected error occurred
+ */
 router.patch(
     "/:id",
     protect,
@@ -196,7 +177,26 @@ router.patch(
     storeController.updateStore
 );
 
-// Delete a store
+/**
+ * @api {delete} /stores/:id Delete store
+ * @apiName DeleteStore
+ * @apiGroup Stores
+ *
+ * @apiDescription
+ * Deletes a store by its identifier.
+ * Requires authentication and an administrator role.
+ *
+ * @apiHeader {String} Authorization Bearer JWT token
+ *
+ * @apiParam {String} id Store unique identifier
+ *
+ * @apiSuccess (204) NoContent Store successfully deleted
+ *
+ * @apiError (401) Unauthorized Authentication required
+ * @apiError (403) Forbidden Admin access required
+ * @apiError (404) NotFound Store not found
+ * @apiError (500) InternalServerError An unexpected error occurred
+ */
 router.delete(
     "/:id",
     protect,

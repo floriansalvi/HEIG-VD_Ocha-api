@@ -3,6 +3,34 @@ import bcrypt from "bcrypt";
 import { generateToken } from "../../utils/generateToken.js";
 
 /**
+ * Handle Mongoose-related errors and return an appropriate HTTP response.
+ *
+ * @param {Object} res Express response object.
+ * @param {Error} error Mongoose error instance.
+ * @return {Object} JSON response with an appropriate HTTP status code.
+ */
+const handleMongooseError = (res, error) => {
+    if (error.name === "ValidationError") {
+        return res.status(422).json({
+            message: "Invalid data",
+            error: error.message
+        });
+    }
+
+    if (error.code === 11000) {
+        return res.status(409).json({
+            message: "Data conflict",
+            error: error.message
+        });
+    }
+
+    return res.status(500).json({
+        message: "An unexpected error occurred",
+        error: error.message
+    });
+};
+
+/**
  * Register a new user.
  *
  * This controller handles user registration by:
@@ -23,6 +51,12 @@ import { generateToken } from "../../utils/generateToken.js";
 const register = async (req, res) => {
     try {
         const { email, password, display_name, phone } = req.body;
+
+        if(!email || !password || !display_name) {
+            return res.status(400).json({
+                message: "Email, password, and display_name are required"
+            });
+        }
 
         const existingEmail = await User.findOne({ email: email.toLowerCase() });
         if (existingEmail) {
@@ -59,9 +93,7 @@ const register = async (req, res) => {
             }
         });
     } catch (error) {
-        return res.status(500).json({
-            message: "An unexpected error occurred",
-        });
+        return handleMongooseError(res, error);
     }
 };
 
@@ -117,10 +149,7 @@ const login = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Login error:", error);
-        return res.status(500).json({
-            message: "An unexpected error occurred",
-        });
+        return handleMongooseError(res, error);
     }
 };
 

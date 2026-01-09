@@ -25,7 +25,7 @@ const router = express.Router();
  *  Content-Type: application/json
  *  Body: {
  *    "email":"test@example.com",
- *    "password":"password123",
+ *    "password":"Password_123",
  *    "display_name":"test_user",
  *    "phone":"12345678"
  *  }
@@ -36,18 +36,6 @@ const router = express.Router();
  * @apiSuccess (201) {String} user.id User unique identifier
  * @apiSuccess (201) {String} user.email User email address
  * @apiSuccess (201) {String} user.display_name User display name
- *
- * @apiSuccessExample {json} Success response:
- *     HTTP/1.1 201 Created
- *     {
- *       "message": "User successfully registered",
- *       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
- *       "user": {
- *         "id": "64f1c2e9a1b2c3d4e5f67890",
- *         "email": "test@example.com",
- *         "display_name": "test_user"
- *       }
- *     }
  *
  * @apiError (400) BadRequest Request body is missing or validation error for email, password, display_name, or phone
  * @apiError (409) Conflict Email or display_name already in use
@@ -79,7 +67,7 @@ router.post(
  *  Content-Type: application/json
  *  Body: {
  *    "email":"test@example.com",
- *    "password":"password123"
+ *    "password":"Password_123"
  *  }
  *
  * @apiSuccess (200) {String} message Success message
@@ -89,18 +77,7 @@ router.post(
  * @apiSuccess (200) {String} user.email User email address
  * @apiSuccess (200) {String} user.display_name User display name
  *
- * @apiSuccessExample {json} Success response:
- *     HTTP/1.1 200 OK
- *     {
- *       "message": "Login successful",
- *       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
- *       "user": {
- *         "id": "64f1c2e9a1b2c3d4e5f67890",
- *         "email": "user@example.com",
- *         "display_name": "John Doe"
- *       }
- *     }
- *
+ * @apiError (400) BadRequest Email and password required
  * @apiError (401) Unauthorized Email or password incorrect
  * @apiError (500) InternalServerError An unexpected error occurred
  */

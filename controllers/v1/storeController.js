@@ -17,13 +17,14 @@ const handleMongooseError = (res, error) => {
 
     if (error.code === 11000) {
         return res.status(409).json({
-            message: "Data conflict (duplicate)",
+            message: "Data conflict",
             error: error.message
         });
     }
 
     return res.status(500).json({
-        message: "An unexpected error occurred"
+        message: "An unexpected error occurred",
+        error: error.message
     });
 };
 
@@ -49,9 +50,15 @@ const createStore = async (req, res) => {
             });
         }
 
-        const existingEmail = await Store.findOne({ email });
-        if (existingEmail) {
-            return res.status(409).json({ message: "Email already used for a store" });
+        const existingStore = await Store.findOne({
+            $or: [
+                { email: email.toLowerCase() },
+                { name }
+            ]
+        });
+
+        if (existingStore) {
+            return res.status(409).json({ message: "Name or/and email already in use" });
         }
 
         const store = new Store({
@@ -135,9 +142,7 @@ const getStores = async (req, res) => {
             stores
         });
     } catch (error) {
-        return res.status(500).json({
-            message: "An unexpected error occurred"
-        });
+        return handleMongooseError(res, error);
     }
 };
 
@@ -160,10 +165,7 @@ const getStoreById = async (req, res) => {
             store
         });
     } catch (error) {
-        return res.status(400).json({
-            message: "Invalid request (invalid id)",
-            error: error.message
-        });
+        return handleMongooseError(res, error);
     }
 };
 
@@ -207,7 +209,7 @@ const updateStore = async (req, res) => {
  *
  * @param {Object} req Express request object.
  * @param {Object} res Express response object.
- * @return {void}
+ * @return {Object} JSON response containing success message.
  */
 const deleteStore = async (req, res) => {
     try {
@@ -216,12 +218,9 @@ const deleteStore = async (req, res) => {
             return res.status(404).json({ message: "Store not found" });
         }
 
-        return res.status(204).send();
+        return res.status(204).json({ message: "Store deleted successfully" });
     } catch (error) {
-        return res.status(400).json({
-            message: "Invalid request (invalid id)",
-            error: error.message
-        });
+        return handleMongooseError(res, error);
     }
 };
 

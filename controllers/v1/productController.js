@@ -18,15 +18,75 @@ const handleMongooseError = (res, error) => {
 
     if (error.code === 11000) {
         return res.status(409).json({
-            message: "Data conflict (slug already used)",
+            message: "Data conflict",
             error: error.message
         });
     }
 
     return res.status(500).json({
-        message: "An error occurred :",
+        message: "An unexpected error occurred",
         error: error.message
     });
+};
+
+/**
+ * Retrieve a paginated list of products.
+ *
+ * Supports optional filtering by active status.
+ *
+ * @param {Object} req Express request object.
+ * @param {Object} res Express response object.
+ * @return {Object} JSON response containing paginated products.
+ */
+const getProducts = async (req, res) => {
+    try {
+        const { active } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        let filter = {};
+        if (active === 'true') filter.isActive = true;
+
+        const products = await Product.find(filter)
+            .skip(skip)
+            .limit(limit);
+
+        const totalProducts = await Product.countDocuments(filter);
+
+        return res.status(200).json({
+            message: "List of products",
+            page,
+            totalPages: Math.ceil(totalProducts / limit),
+            totalProducts,
+            products
+        });
+    } catch (error) {
+        return handleMongooseError(res, error);
+    }
+};
+
+/**
+ * Retrieve a single product by its identifier.
+ *
+ * @param {Object} req Express request object.
+ * @param {Object} res Express response object.
+ * @return {Object} JSON response containing the product.
+ */
+const getProductById = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+
+        return res.status(200).json({
+            message: "Product found",
+            product
+        });
+    } catch (error) {
+        return handleMongooseError(res, error);
+    }
 };
 
 /**
@@ -63,7 +123,12 @@ const createProduct = async (req, res) => {
 
         const existingSlug = await Product.findOne({ slug });
         if (existingSlug) {
-            return res.status(409).json({ message: "Slug already used" });
+            return res.status(409).json({ message: "Slug already in use" });
+        }
+
+        const existingName = await Product.findOne({ name });
+        if (existingName) {
+            return res.status(409).json({ message: "Name already in use" });
         }
 
         const product = new Product({
@@ -86,72 +151,6 @@ const createProduct = async (req, res) => {
         });
     } catch (error) {
         return handleMongooseError(res, error);
-    }
-};
-
-/**
- * Retrieve a paginated list of products.
- *
- * Supports optional filtering by active status.
- *
- * @param {Object} req Express request object.
- * @param {Object} res Express response object.
- * @return {Object} JSON response containing paginated products.
- */
-const getProducts = async (req, res) => {
-    try {
-        const { active } = req.query;
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
-
-        let filter = {};
-        if (active === 'true') filter.isActive = true;
-
-        const products = await Product.find(filter)
-            .skip(skip)
-            .limit(limit);
-
-        const totalProducts = await Product.countDocuments(filter);
-
-        return res.status(200).json({
-            message: "List of products",
-            page,
-            totalPages: Math.ceil(totalProducts / limit),
-            totalProducts,
-            products
-        });
-    } catch (error) {
-        return res.status(500).json({
-            message: "An error occurred : ",
-            error: error.message
-        });
-    }
-};
-
-/**
- * Retrieve a single product by its identifier.
- *
- * @param {Object} req Express request object.
- * @param {Object} res Express response object.
- * @return {Object} JSON response containing the product.
- */
-const getProductById = async (req, res) => {
-    try {
-        const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(404).json({ message: "Product not found" });
-        }
-
-        return res.status(200).json({
-            message: "Product found",
-            product
-        });
-    } catch (error) {
-        return res.status(400).json({
-            message: "Invalid request (invalid id)",
-            error: error.message
-        });
     }
 };
 
@@ -216,10 +215,7 @@ const deleteProduct = async (req, res) => {
 
         return res.status(204).send();
     } catch (error) {
-        return res.status(400).json({
-            message: "Invalid request (invalid id)",
-            error: error.message
-        });
+        return handleMongooseError(res, error);
     }
 };
 
@@ -250,7 +246,7 @@ const uploadProductImage = async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ message: "Error uploading image", error: error.message });
+        return handleMongooseError(res, error);
     }
 };
 
@@ -260,9 +256,9 @@ const uploadProductImage = async (req, res) => {
  * Groups all product-related controller methods.
  */
 export const productController = {
-    createProduct,
     getProducts,
     getProductById,
+    createProduct,
     updateProduct,
     deleteProduct,
     uploadProductImage

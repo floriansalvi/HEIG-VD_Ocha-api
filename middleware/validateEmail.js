@@ -40,7 +40,7 @@ export const validateEmail = async (req, res, next) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if(!emailRegex.test(cleanedEmail)) {
-            return res.status(400).json({ message:
+            return res.status(422).json({ message:
                 "Invalid email"
             });
         }

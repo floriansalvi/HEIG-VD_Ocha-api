@@ -26,6 +26,7 @@ const handleMongooseError = (res, error) => {
 
     return res.status(500).json({
         message: "An unexpected error occurred",
+        error: error.message
     });
 };
 
@@ -47,8 +48,8 @@ const createOrder = async (req, res) => {
         const userId = req.user?.id;
         
         if (!userId) {
-            return res.status(401).json({
-                message: "Authentication required"
+            return res.status(400).json({
+                message: "User id required"
             });
         }
 
@@ -56,7 +57,7 @@ const createOrder = async (req, res) => {
 
         if (!store_id || !pickup || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({
-                message: "store_id, pickup et items sont requis"
+                message: "store_id, pickup and items are required"
             });
         }
 
@@ -126,12 +127,6 @@ const getMyOrders = async (req, res) => {
     try {
         const userId = req.user?.id;
 
-        if (!userId) {
-            return res.status(401).json({
-                message: "Authentication required"
-            });
-        }
-
         const { status, store_id } = req.query;
 
         let filter = { user_id: userId };
@@ -158,9 +153,7 @@ const getMyOrders = async (req, res) => {
             orders
         });
     } catch (error) {
-        return res.status(500).json({
-            message: "An unexpected error occurred"
-        });
+        return handleMongooseError(res, error);
     }
 };
 
@@ -186,10 +179,7 @@ const getOrderById = async (req, res) => {
             order
         });
     } catch (error) {
-        return res.status(400).json({
-            message: "Invalid request (invalid id)",
-            error: error.message
-        });
+        return handleMongooseError(res, error);
     }
 };
 
@@ -215,9 +205,7 @@ const updateOrderStatus = async (req, res) => {
         try {
             await order.setStatus(status);
         } catch (err) {
-            return res.status(400).json({
-                message: err.message
-            });
+            return handleMongooseError(res, error);
         }
 
         return res.status(200).json({
@@ -247,10 +235,7 @@ const deleteOrder = async (req, res) => {
 
         return res.status(204).send();
     } catch (error) {
-        return res.status(400).json({
-            message: "Invalid request (invalid id)",
-            error: error.message
-        });
+        return handleMongooseError(res, error);
     }
 };
 

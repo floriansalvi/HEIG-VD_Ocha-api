@@ -32,7 +32,7 @@ export const validatePassword = (req, res, next) => {
         }
 
         if (password.length < 8) {
-            return res.status(400).json({
+            return res.status(422).json({
                 message: "Password must contain at least 8 characters"
             });
         }
@@ -43,7 +43,7 @@ export const validatePassword = (req, res, next) => {
         const hasSpecialChar = /[\W_]/.test(password);
 
         if (!hasLowercase || !hasUppercase || !hasNumber || !hasSpecialChar) {
-            return res.status(400).json({
+            return res.status(422).json({
                 message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
             });
         }

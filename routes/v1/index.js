@@ -13,14 +13,10 @@ const router = express.Router();
  * @apiExample request example:
  *  GET /api/v1/health
  *
- * @apiSuccess (200) {String} message Server response message
- *
- * @apiSuccessExample {text} Success response:
- *     HTTP/1.1 200 OK
- *     Ignition!
+ * @apiSuccess (200) {String} response Plain text response
  */
 router.get("/health", function (req, res, next) {
-  res.send("Ignition!");
+  res.status(200).send("Ignition!");
 });
 
 export default router;
