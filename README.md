@@ -2,7 +2,6 @@
 API REST pour la gestion de matcha shops Ocha, incluant la gestion des utilisateurs, produits, magasins et commandes.
 
 ## Sommaire 🛣️
-- []()
 - [Description](#description-)
 - [Fonctionnalités générales](#fonctionnalités-générales-)
 - [Stack technique](#stack-technique-️)
