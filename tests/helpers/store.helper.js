@@ -6,12 +6,14 @@ import mongoose from "mongoose";
  * @param {Object} overrides - valeurs à surcharger
  * @returns {Object} storeData
  */
+
 export const getValidStoreData = (overrides = {}) => {
+    const timestamp = Date.now();
     return {
-        name: overrides.name || "Test Store",
-        slug: overrides.slug || "test-store",
+        name: overrides.name || `Test Store ${timestamp}`,
+        slug: overrides.slug || `test-store-${timestamp}`,
         phone: overrides.phone || "+41214445566",
-        email: overrides.email || "store@test.com",
+        email: overrides.email || `store-${timestamp}@test.com`,
         address: {
             line1: overrides.line1 || "Rue de Test 1",
             city: overrides.city || "Lausanne",
@@ -20,7 +22,7 @@ export const getValidStoreData = (overrides = {}) => {
         },
         location: {
             type: "Point",
-            coordinates: overrides.coordinates || [6.629, 46.522] // [longitude, latitude]
+            coordinates: overrides.coordinates || [6.629, 46.522]
         },
         is_active: overrides.is_active !== undefined ? overrides.is_active : true,
         opening_hours: overrides.opening_hours || [

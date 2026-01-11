@@ -70,6 +70,7 @@ router.post(
  * @apiSuccess (200) {String} message Success message
  * @apiSuccess (200) {Object} order Order data
  *
+ * @apiError (400) BadRequest Invalid ID format
  * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (404) NotFound Order not found
  * @apiError (500) InternalServerError An unexpected error occurred
@@ -98,6 +99,7 @@ router.get(
  *
  * @apiSuccess (204) NoContent Order successfully deleted
  *
+ * @apiError (400) BadRequest Invalid ID format
  * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (404) NotFound Order not found
  * @apiError (500) InternalServerError An unexpected error occurred
@@ -133,7 +135,7 @@ router.delete(
  * @apiSuccess (200) {String} message Success message
  * @apiSuccess (200) {Object} order Updated order object
  *
- * @apiError (400) BadRequest Invalid request or missing data
+ * @apiError (400) BadRequest Invalid request, Missing data or Invalid ID format
  * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
  * @apiError (404) NotFound Order not found
@@ -167,6 +169,7 @@ router.patch(
  *
  * @apiSuccess (200) {Object[]} items List of order items
  *
+ * @apiError (400) BadRequest Invalid ID format
  * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (404) NotFound Order not found
  * @apiError (500) InternalServerError An unexpected error occurred

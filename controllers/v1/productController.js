@@ -1,33 +1,8 @@
 import Product from "../../models/product.js";
 import cloudinary from "../../config/cloudinary.js";
-
-/**
- * Handle Mongoose-related errors and return an appropriate HTTP response.
- *
- * @param {Object} res Express response object.
- * @param {Error} error Mongoose error instance.
- * @return {Object} JSON response with an appropriate HTTP status code.
- */
-const handleMongooseError = (res, error) => {
-    if (error.name === "ValidationError") {
-        return res.status(422).json({
-            message: "Invalid data",
-            error: error.message
-        });
-    }
-
-    if (error.code === 11000) {
-        return res.status(409).json({
-            message: "Data conflict",
-            error: error.message
-        });
-    }
-
-    return res.status(500).json({
-        message: "An unexpected error occurred",
-        error: error.message
-    });
-};
+import mongoose from "mongoose";
+import { handleMongooseError } from "../../utils/errorHandler.js";
+import { broadcast } from "../../bin/start.js";
 
 /**
  * Retrieve a paginated list of products.
@@ -75,7 +50,13 @@ const getProducts = async (req, res) => {
  */
 const getProductById = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const { id } = req.params;
+        
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid ID format" });
+        }
+
+        const product = await Product.findById(id);
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
         }
@@ -145,6 +126,8 @@ const createProduct = async (req, res) => {
 
         await product.save();
 
+        broadcast({ type: 'new_product', product });
+
         return res.status(201).json({
             message: "Product created",
             product
@@ -165,7 +148,13 @@ const createProduct = async (req, res) => {
  */
 const updateProduct = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const { id } = req.params;
+        
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid ID format" });
+        }
+
+        const product = await Product.findById(id);
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
         }
@@ -208,7 +197,13 @@ const updateProduct = async (req, res) => {
  */
 const deleteProduct = async (req, res) => {
     try {
-        const product = await Product.findByIdAndDelete(req.params.id);
+        const { id } = req.params;
+        
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid ID format" });
+        }
+
+        const product = await Product.findByIdAndDelete(id);
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
         }
@@ -221,7 +216,13 @@ const deleteProduct = async (req, res) => {
 
 const uploadProductImage = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id);
+        const { id } = req.params;
+        
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid ID format" });
+        }
+
+        const product = await Product.findById(id);
         if (!product) return res.status(404).json({ message: "Product not found" });
 
         const { image } = req.body;

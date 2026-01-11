@@ -60,7 +60,8 @@ describe("Order API", () => {
                     items: [
                         {
                             product_id: product._id,
-                            size: "M"
+                            size: "M",
+                            quantity: 1
                         }
                     ]
                 })
@@ -70,9 +71,7 @@ describe("Order API", () => {
             expect(res.body.order.user_id._id).toBe(normalUser._id.toString());
             expect(res.body.order.total_price_chf).toBeGreaterThan(0);
 
-            const orderItems = await OrderItem.find({
-                order_id: res.body.order._id
-            });
+            const orderItems = await OrderItem.find({ order_id: res.body.order._id });
             expect(orderItems).toHaveLength(1);
         });
 
@@ -105,7 +104,8 @@ describe("Order API", () => {
                     items: [
                         {
                             product_id: product._id,
-                            size: "M"
+                            size: "M",
+                            quantity: 1
                         }
                     ]
                 })
@@ -116,12 +116,12 @@ describe("Order API", () => {
     });
 
     // -------------------------
-    // GET MY ORDERS (via users route)
+    // GET MY ORDERS
     // -------------------------
-    describe("GET /api/v1/users/me/orders", () => {
+    describe("GET /api/v1/users/orders", () => {
         it("should return empty list when user has no orders", async () => {
             const res = await request(app)
-                .get("/api/v1/users/me/orders")
+                .get("/api/v1/users/orders")
                 .set("Authorization", `Bearer ${userToken}`)
                 .expect(200);
 
@@ -129,7 +129,7 @@ describe("Order API", () => {
             expect(res.body.totalOrders).toBe(0);
         });
 
-        it("should return user's orders only", async () => {
+        it("should return only user's orders", async () => {
             await Order.create({
                 user_id: normalUser._id,
                 store_id: store._id,
@@ -145,7 +145,7 @@ describe("Order API", () => {
             });
 
             const res = await request(app)
-                .get("/api/v1/users/me/orders")
+                .get("/api/v1/users/orders")
                 .set("Authorization", `Bearer ${userToken}`)
                 .expect(200);
 
@@ -155,7 +155,7 @@ describe("Order API", () => {
 
         it("should fail without authentication", async () => {
             await request(app)
-                .get("/api/v1/users/me/orders")
+                .get("/api/v1/users/orders")
                 .expect(401);
         });
     });
@@ -197,7 +197,7 @@ describe("Order API", () => {
                 .set("Authorization", `Bearer ${userToken}`)
                 .expect(400);
 
-            expect(res.body.message).toContain("invalid");
+            expect(res.body.message).toContain("Invalid ID format");
         });
     });
 
@@ -282,7 +282,8 @@ describe("Order API", () => {
             await OrderItem.create({
                 order_id: order._id,
                 product_id: product._id,
-                size: "M"
+                size: "M",
+                quantity: 1
             });
 
             await request(app)

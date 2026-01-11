@@ -9,8 +9,8 @@ import Product from "../../models/product.js";
 export const getValidProductData = (overrides = {}) => {
     const timestamp = Date.now();
     return {
-        slug: `test-product`,
-        name: "Test Product",
+        slug: overrides.slug || `test-product-${timestamp}`,
+        name: overrides.name || `Test Product ${timestamp}`,
         category: "Test Category",
         description: "Test Description",
         basePriceCHF: 10,

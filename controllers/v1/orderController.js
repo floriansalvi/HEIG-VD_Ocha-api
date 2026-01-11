@@ -2,34 +2,8 @@ import Order from "../../models/order.js";
 import Store from "../../models/store.js";
 import OrderItem from "../../models/orderItem.js";
 import Product from "../../models/product.js";
-
-/**
- * Handle Mongoose-related errors and return an appropriate HTTP response.
- *
- * @param {Object} res Express response object.
- * @param {Error} error Mongoose error instance.
- * @return {Object} JSON response with an appropriate HTTP status code.
- */
-const handleMongooseError = (res, error) => {
-    if (error.name === "ValidationError") {
-        return res.status(422).json({
-            message: "Invalid data",
-            error: error.message
-        });
-    }
-
-    if (error.code === 11000) {
-        return res.status(409).json({
-            message: "Data conflict",
-            error: error.message
-        });
-    }
-
-    return res.status(500).json({
-        message: "An unexpected error occurred",
-        error: error.message
-    });
-};
+import mongoose from "mongoose";
+import { handleMongooseError } from "../../utils/errorHandler.js";
 
 /**
  * Create a new order for the authenticated user.
@@ -173,7 +147,13 @@ const getMyOrders = async (req, res) => {
  */
 const getOrderById = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id)
+        const { id } = req.params;
+                
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid ID format" });
+        }
+
+        const order = await Order.findById(id)
             .populate("store_id")
             .populate("user_id", "email display_name");
 
@@ -204,7 +184,13 @@ const updateOrderStatus = async (req, res) => {
             return res.status(400).json({ message: "New status is required" });
         }
 
-        const order = await Order.findById(req.params.id);
+        const { id } = req.params;
+                
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid ID format" });
+        }
+
+        const order = await Order.findById(id);
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
@@ -233,7 +219,13 @@ const updateOrderStatus = async (req, res) => {
  */
 const deleteOrder = async (req, res) => {
     try {
-        const order = await Order.findByIdAndDelete(req.params.id);
+        const { id } = req.params;
+                
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid ID format" });
+        }
+
+        const order = await Order.findByIdAndDelete(id);
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }

@@ -1,32 +1,7 @@
 import Store from "../../models/store.js";
-
-/**
- * Handle Mongoose-related errors and return an appropriate HTTP response.
- *
- * @param {Object} res Express response object.
- * @param {Error} error Mongoose error instance.
- * @return {Object} JSON response with an appropriate HTTP status code.
- */
-const handleMongooseError = (res, error) => {
-    if (error.name === "ValidationError") {
-        return res.status(422).json({
-            message: "Invalid data",
-            error: error.message
-        });
-    }
-
-    if (error.code === 11000) {
-        return res.status(409).json({
-            message: "Data conflict",
-            error: error.message
-        });
-    }
-
-    return res.status(500).json({
-        message: "An unexpected error occurred",
-        error: error.message
-    });
-};
+import mongoose from "mongoose";
+import slugify from "slugify";
+import { handleMongooseError } from "../../utils/errorHandler.js";
 
 /**
  * Create a new store.
@@ -98,7 +73,7 @@ const getStores = async (req, res) => {
 
             if (!lng || !lat) {
                 return res.status(400).json({
-                    message: "Invalid near parameter. Expected format: lat,lng"
+                    message: "Invalid near parameter. Expected format: lng,lat"
                 });
             }
 
@@ -155,7 +130,13 @@ const getStores = async (req, res) => {
  */
 const getStoreById = async (req, res) => {
     try {
-        const store = await Store.findById(req.params.id);
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid ID format" });
+        }
+
+        const store = await Store.findById(id);
         if (!store) {
             return res.status(404).json({ message: "Store not found" });
         }
@@ -180,7 +161,14 @@ const getStoreById = async (req, res) => {
  */
 const updateStore = async (req, res) => {
     try {
-        const store = await Store.findById(req.params.id);
+
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid ID format" });
+        }
+
+        const store = await Store.findById(id);
         if (!store) {
             return res.status(404).json({ message: "Store not found" });
         }
@@ -190,6 +178,10 @@ const updateStore = async (req, res) => {
         updatableFields.forEach(field => {
             if (req.body[field] !== undefined) {
                 store[field] = req.body[field];
+
+                if (field === "name") {
+                    store.slug = slugify(req.body.name, { lower: true });
+                }
             }
         });
 
@@ -213,12 +205,18 @@ const updateStore = async (req, res) => {
  */
 const deleteStore = async (req, res) => {
     try {
-        const store = await Store.findByIdAndDelete(req.params.id);
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid ID format" });
+        }
+
+        const store = await Store.findByIdAndDelete(id);
         if (!store) {
             return res.status(404).json({ message: "Store not found" });
         }
 
-        return res.status(204).json({ message: "Store deleted successfully" });
+        return res.sendStatus(204);
     } catch (error) {
         return handleMongooseError(res, error);
     }

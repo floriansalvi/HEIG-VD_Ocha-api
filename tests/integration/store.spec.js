@@ -5,6 +5,9 @@ import Store from "../../models/store.js";
 import { connectTestDb, closeTestDb, clearTestDb } from "../setup/testDB.js";
 import { createUserWithToken, getValidStoreData, createStore } from "../helpers/index.js";
 
+// -------------------------
+// SETUP: In-Memory MongoDB
+// -------------------------
 beforeAll(async () => {
     await connectTestDb();
 });
@@ -17,6 +20,9 @@ beforeEach(async () => {
     await clearTestDb();
 });
 
+// -------------------------
+// STORE API TESTS
+// -------------------------
 describe("Store API", () => {
     let adminToken;
     let userToken;
@@ -98,11 +104,26 @@ describe("Store API", () => {
             });
 
             const res = await request(app)
-                .get("/api/v1/stores?near=46.522,6.629&radius=1000")
+                .get("/api/v1/stores?near=6.629,46.522&radius=1000")
                 .expect(200);
 
             expect(res.body.stores).toHaveLength(1);
             expect(res.body.stores[0].name).toBe("Nearby Store");
+        });
+
+        it("should paginate results correctly", async () => {
+            for (let i = 0; i < 15; i++) {
+                await createStore({ slug: `store-${i}`, name: `Store ${i}` });
+            }
+
+            const res = await request(app)
+                .get("/api/v1/stores?page=2&limit=10")
+                .expect(200);
+
+            expect(res.body.stores).toHaveLength(5);
+            expect(res.body.page).toBe(2);
+            expect(res.body.totalPages).toBe(2);
+            expect(res.body.totalStores).toBe(15);
         });
     });
 
@@ -156,7 +177,21 @@ describe("Store API", () => {
             expect(res.body.store.phone).toBe("+41214445555");
         });
 
-        it("should fail with non-admin role", async () => {
+        it("should update multiple fields", async () => {
+            const store = await createStore({ name: "Multi Update", slug: "multi-update" });
+
+            const res = await request(app)
+                .patch(`/api/v1/stores/${store._id}`)
+                .set("Authorization", `Bearer ${adminToken}`)
+                .send({ name: "Updated Name", phone: "+41210000000" })
+                .expect(200);
+
+            expect(res.body.store.name).toBe("Updated Name");
+            expect(res.body.store.slug).toBe("updated-name");
+            expect(res.body.store.phone).toBe("+41210000000");
+        });
+
+        it("should fail for non-admin role", async () => {
             const store = await createStore();
 
             await request(app)
@@ -164,6 +199,27 @@ describe("Store API", () => {
                 .set("Authorization", `Bearer ${userToken}`)
                 .send({ phone: "+41214445555" })
                 .expect(403);
+        });
+
+        it("should return 404 for non-existent store", async () => {
+            const fakeId = new mongoose.Types.ObjectId();
+
+            const res = await request(app)
+                .patch(`/api/v1/stores/${fakeId}`)
+                .set("Authorization", `Bearer ${adminToken}`)
+                .send({ phone: "+41214445555" })
+                .expect(404);
+
+            expect(res.body.message).toBe("Store not found");
+        });
+
+        it("should fail without authentication", async () => {
+            const store = await createStore();
+
+            await request(app)
+                .patch(`/api/v1/stores/${store._id}`)
+                .send({ phone: "+41214445555" })
+                .expect(401);
         });
     });
 
@@ -190,6 +246,34 @@ describe("Store API", () => {
                 .delete(`/api/v1/stores/${store._id}`)
                 .set("Authorization", `Bearer ${userToken}`)
                 .expect(403);
+        });
+
+        it("should return 404 for non-existent store", async () => {
+            const fakeId = new mongoose.Types.ObjectId();
+
+            const res = await request(app)
+                .delete(`/api/v1/stores/${fakeId}`)
+                .set("Authorization", `Bearer ${adminToken}`)
+                .expect(404);
+
+            expect(res.body.message).toBe("Store not found");
+        });
+
+        it("should return 400 for invalid id format", async () => {
+            const res = await request(app)
+                .delete("/api/v1/stores/invalid-id")
+                .set("Authorization", `Bearer ${adminToken}`)
+                .expect(400);
+
+            expect(res.body.message).toContain("Invalid");
+        });
+
+        it("should fail without authentication", async () => {
+            const store = await createStore();
+
+            await request(app)
+                .delete(`/api/v1/stores/${store._id}`)
+                .expect(401);
         });
     });
 });

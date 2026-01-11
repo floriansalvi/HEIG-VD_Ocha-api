@@ -76,7 +76,7 @@ describe("Product API", () => {
                 .send(getValidProductData({ slug: "duplicate-slug" }))
                 .expect(409);
 
-            expect(res.body.message).toContain("Slug already used");
+            expect(res.body.message).toContain("Slug already in use");
         });
 
         it("should fail without authentication", async () => {

@@ -53,6 +53,7 @@ router.get(
  * @apiSuccess (200) {String} message Response message
  * @apiSuccess (200) {Object} store Store data
  *
+ * @apiError (400) BadRequest Invalid ID format
  * @apiError (404) NotFound Store not found
  * @apiError (500) InternalServerError An unexpected error occurred
 
@@ -159,6 +160,7 @@ router.post(
  * @apiSuccess (200) {String} message Success message
  * @apiSuccess (200) {Object} store Updated store
  *
+ * @apiError (400) BadRequest Invalid ID format
  * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
  * @apiError (404) NotFound Store not found
@@ -188,6 +190,7 @@ router.patch(
  *
  * @apiSuccess (204) NoContent Store successfully deleted
  *
+ * @apiError (400) BadRequest Invalid ID format
  * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
  * @apiError (404) NotFound Store not found

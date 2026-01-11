@@ -2,6 +2,7 @@
 
 import createDebugger from "debug";
 import http from "node:http";
+import { WebSocketServer } from "ws";
 
 import app from "../app.js";
 
@@ -13,6 +14,19 @@ app.set("port", port);
 
 // Create HTTP server
 const httpServer = http.createServer(app);
+
+const wss = new WebSocketServer({ server: httpServer });
+
+wss.on("connection", (ws) => {
+    console.log("Client connecté via WebSocket");
+    ws.send(JSON.stringify({ message: "Connecté au WebSocket" }));
+});
+
+export const broadcast = (data) => {
+    wss.clients.forEach(client => {
+        if (client.readyState === 1) client.send(JSON.stringify(data));
+    });
+};
 
 // Listen on provided port, on all network interfaces
 httpServer.listen(port);

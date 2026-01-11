@@ -51,6 +51,7 @@ router.get(
  * @apiSuccess (200) {String} message Response message
  * @apiSuccess (200) {Object} product Product data
  *
+ * @apiError (400) BadRequest Invalid ID format
  * @apiError (404) NotFound Product not found
  * @apiError (500) InternalServerError An unexpected error occurred
  */
@@ -133,6 +134,7 @@ router.post(
  * @apiSuccess (200) {String} message Response message
  * @apiSuccess (200) {Object} product Updated product
  *
+ * @apiError (400) BadRequest Invalid ID format
  * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
  * @apiError (404) NotFound Product not found
@@ -166,6 +168,7 @@ router.patch(
  *
  * @apiSuccess (204) NoContent Product successfully deleted
  *
+ * @apiError (400) BadRequest Invalid ID format
  * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
  * @apiError (404) NotFound Product not found
@@ -204,7 +207,7 @@ router.delete(
  * @apiSuccess (200) {String} message Success message
  * @apiSuccess (200) {Object} product Updated product
  *
- * @apiError (400) BadRequest Invalid file or request
+ * @apiError (400) BadRequest Invalid file or request, Invalid ID format
  * @apiError (401) Unauthorized Missing or invalid token
  * @apiError (403) Forbidden Admin access required
  * @apiError (404) NotFound Product not found
