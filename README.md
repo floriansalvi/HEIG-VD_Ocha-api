@@ -13,7 +13,7 @@ l'API Ocha constitue le back-end qui sert l'application Vue.js Ocha, chaîne de 
 - Rôles `user` et `admin` définissant les actions autorisées
 - Hachage des mots de passe avec l'algorithme de hachage bcrypt
 
-## Gestion des ressources 🧩
+### Gestion des ressources 🧩
 - **Gestion des comptes utilisateurs** : Création et récupération des profils
 - **Gestion des produits** : Création, mise à jour, suppression et récupération des produits
 - **Gestion des magasins** : Création, mise à jour, suppression et récupération des magasins
@@ -103,8 +103,5 @@ npm run test
 
 ### Accèder à l'API
 
-**Accès à l'API**
-[http://localhost:5001](http://localhost:5001)
-
-**Accès à la documentation de l'API**
-[http://localhost:5001/api/v1/api-docs](http://localhost:5001/api/v1/api-docs)
+- **Accès à l'API** : [http://localhost:5001](http://localhost:5001)
+- **Accès à la documentation de l'API** : [http://localhost:5001/api/v1/api-docs](http://localhost:5001/api/v1/api-docs)
