@@ -36,9 +36,45 @@ info:
     - **Base de données** : MongoDB avec Mongoose
     - **Authentification** : JSON Web Tokens (JWT)
     - **Hashage des mots de passe** : bcrypt
+    - **Temps réel** : WebSockets (WS) pour notifier les utilisateurs lors de la création de nouveaux produits
     - **Test** : Jest et Supertest
     - **Documentation** : OpenAPI (Swagger) et apiDocs
 
+    ## Temps réel / WebSockets
+    L’API fournit des notifications en temps réel via WebSockets.  
+    Exemple : lorsqu’un nouveau produit est créé, tous les clients connectés reçoivent automatiquement une notification avec les détails du produit.  
+
+    - **Protocole** : WebSocket sécurisé (`wss://`)  
+    - **Message envoyé** : JSON contenant `type` et `product`  
+    ```json
+    {
+      "type": "new_product",
+      "product": {
+          "slug": "white-matcha-latte",
+          "name": "White Matcha Latte",
+          "category": "Boissons",
+          "description": "Delicious strawberry matcha latte",
+          "basePriceCHF": 5,
+          "isActive": true,
+          "image": "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/mixed-berries-matcha-latte.jpg",
+          "size": [
+              "S",
+              "M",
+              "L"
+          ],
+          "extra_chf": {
+              "S": 0,
+              "M": 2,
+              "L": 3
+          },
+          "_id": "6963df54690dd6c58ddb2e83",
+          "createdAt": "2026-01-11T17:35:16.545Z",
+          "updatedAt": "2026-01-11T17:35:16.545Z",
+          "__v": 0
+      }
+    }
+    ```
+    
     ## Équipe de développement
     Ce travail a été réalisé durant les cours d'Architecture Orientéee Web et de Développement Mobile lors du cinquième semestre du Bachelor of Science en Ingénierie des Médias à la HEIG-VD.
 
