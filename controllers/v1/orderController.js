@@ -91,7 +91,7 @@ const createOrder = async (req, res) => {
             if (!product) return res.status(404).json({ message: "Product not found" });
 
             const price = product.basePriceCHF + (product.extra_chf[size] || 0);
-            const finalPrice = price * quantity;
+            const finalPrice = parseFloat((price * quantity).toFixed(2))
 
             const orderItem = new OrderItem({
                 order_id: order._id,
