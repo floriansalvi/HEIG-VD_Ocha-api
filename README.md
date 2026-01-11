@@ -241,7 +241,7 @@ Content-Type: application/json
 ```
 
 ### Body
-```http
+```
 Body: {
     …voir la documentation
 }
