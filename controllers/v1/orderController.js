@@ -1,6 +1,7 @@
 import Order from "../../models/order.js";          
 import Store from "../../models/store.js";
 import OrderItem from "../../models/orderItem.js";
+import Product from "../../models/product.js";
 
 /**
  * Handle Mongoose-related errors and return an appropriate HTTP response.
@@ -86,6 +87,12 @@ const createOrder = async (req, res) => {
                 });
             }
 
+            const product = await Product.findById(product_id);
+            if (!product) return res.status(404).json({ message: "Product not found" });
+
+            const price = product.extra_chf[size];
+            const finalPrice = price * quantity;
+
             const orderItem = new OrderItem({
                 order_id: order._id,
                 product_id,
@@ -95,7 +102,7 @@ const createOrder = async (req, res) => {
 
             await orderItem.save();
 
-            total += orderItem.final_price_chf;
+            total += finalPrice;
         }
 
         order.total_price_chf = total;

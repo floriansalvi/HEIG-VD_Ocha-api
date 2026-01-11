@@ -3,11 +3,76 @@ info:
   title: Ocha API
   version: 1.0.0
   description: |
-    API REST pour la gestion des produits, magasins, commandes et utilisateurs.
+    API REST pour la gestion de matcha shops Ocha, incluant la gestion des utilisateurs, produits, magasins et commandes.
+    
+    ## Fonctionnalités
+    - **Gestion de l'authentification** : Inscription et connexion des utilisateurs avec JWT.
+    - **Gestion des produits** : Création, mise à jour, suppression et récupération des produits.
+    - **Gestion des magasins** : Création, mise à jour, suppression et récupération des magasins.
+    - **Gestion des commandes** : Création de commandes par les utilisateurs, mise à jour du statut
+    - **Statistiques des commandes** : Récupération des statistiques des commandes par utilisateur.
+
+    ## Authentification
+    - **Inscription** : les utilisateurs peuvent s'inscrire en fournissant une adresse e-mail, un mot de passe et un nom d'affichage, eventuellement un numéro de téléphone.
+    - **Connexion** : les utilisateurs peuvent se connecter avec leur adresse e-mail et mot de passe pour obtenir un token JWT.
+    - **Sécurité** : les endpoints protégés nécessitent un token JWT dans l'en-tête `Authorization Bearer <token>`.
+    - **Rôles** : les utilisateurs ont des rôles (`user`, `admin`) qui contrôlent l'accès aux fonctionnalités.
+    - **Hashage des mots de passe** : les mots de passe sont stockés de manière sécurisée en utilisant bcrypt.
+
+    ## Code de status de réponse HTTP pouvant être rencontrés
+    - `200 OK` : Requête réussie (ressource retournée).
+    - `201 Created` : Ressource créée avec succès (ressource retournée).
+    - `204 No Content` : Ressource supprimée avec succès.
+    - `400 Bad Request` : Requête invalide ou mal formée.
+    - `401 Unauthorized` : Authentification requise ou invalide.
+    - `403 Forbidden` : Accès refusé.
+    - `404 Not Found` : Ressource non trouvée.
+    - `409 Conflict` : Conflit lors de la création ou mise à jour d'une ressource.
+    - `422 Unprocessable Entity` : Erreur de validation des données.
+    - `500 Internal Server Error` : Erreur côté serveur.
+
+    ## Stack technique
+    - **Back-end** : Node.js et Express.js
+    - **Base de données** : MongoDB avec Mongoose
+    - **Authentification** : JSON Web Tokens (JWT)
+    - **Hashage des mots de passe** : bcrypt
+    - **Test** : Jest et Supertest
+    - **Documentation** : OpenAPI (Swagger) et apiDocs
+
+    ## Équipe de développement
+    Ce travail a été réalisé durant les cours d'Architecture Orientéee Web et de Développement Mobile lors du cinquième semestre du Bachelor of Science en Ingénierie des Médias à la HEIG-VD.
+
+    Cette API sert l'application web Ocha, chaîne fictive de matcha shops en Suisse et imaginée par Malory Bossel.
+
+    ## Équipe de développement
+    - Cristian Pottier
+    - Emma Chautems
+    - Florian Salvi
+    - Malory Bossel
+
+  contact:
+      name: Équipe de développement Back-end de Ocha
+      email: florian.salvi@hes-so.ch
 
 servers:
-  - url: /api/v1
-    description: API version 1
+  - url: https://heig-vd-ocha-api.onrender.com/api/v1
+    description: Serveur de production - Version 1.0.0 de l'API
+
+tags:
+  - name: Index
+    description: Point d'entrée de l'API avec vérification de l'état de santé
+  - name: Auth
+    description: Gestion de l'authentification des utilisateurs
+  - name: Users
+    description: Gestion des profils utilisateurs
+  - name: Products
+    description: Gestion des produits Ocha
+  - name: Stores
+    description: Gestion des magasins Ocha
+  - name: Orders
+    description: Gestion des commandes des utilisateurs
+  - name: Order Stats
+    description: Statistiques des commandes par utilisateur
 
 components:
   securitySchemes:
@@ -17,46 +82,167 @@ components:
       bearerFormat: JWT
 
   schemas:
+
+    ####################
+    # USER
+    ####################
     User:
       type: object
+      description: Schéma représentant un utilisateur de l'application Ocha.
+      required:
+        - id
+        - email
+        - display_name
+        - role
+        - password
+        - created_at
       properties:
         id:
           type: string
-          example: "64f1c2e9a1b2c3d4e5f12345"
+          format: mongo-id
+          description: Identifiant unique.
+          example: "64a7f0c2e4b0f5d6c8a1b2c3"
         email:
           type: string
           format: email
-          example: "user@example.com"
+          description: Format d'adresse e-mail valide. Unique.
+          example: "user@ocha.ch"
         display_name:
           type: string
-          example: "john_doe"
-    Product:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        price:
-          type: number
-          format: float
-        description:
-          type: string
-        active:
-          type: boolean
-    Store:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        email:
-          type: string
+          minLength: 3
+          maxLength: 30
+          description: Unique. Chiffres, lettres et underscores autorisés.
+          example: "MatchaLover"
         phone:
           type: string
+          nullable: true
+          minLength: 8
+          example: "+41790000000"
+        role:
+          type: string
+          enum: [user, admin]
+          default: user
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: Minimum 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.
+          example: "StrongP@ssw0rd!"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ####################
+    # PRODUCT
+    ####################
+    Product:
+      type: object
+      required:
+        - id
+        - slug
+        - name
+        - category
+        - description
+        - basePriceCHF
+        - image
+        - isActive
+        - size
+        - extra_chf
+        - created_at
+      properties:
+        id:
+          type: string
+          format: mongo-id
+          description: Identifiant unique.
+          example: "64b8f1d3e5c6f7a8b9c0d1e2"
+        slug:
+          type: string
+          description: Identifiant lisible dans l'URL, unique.
+          example: "strawberry-matcha-latte"
+        name:
+          type: string
+          description: Unique.
+          example: "Strawberry Matcha Latte"
+        category:
+          type: string
+        description:
+          type: string
+        basePriceCHF:
+          type: number
+          minimum: 0
+        isActive:
+          type: boolean
+          default: true
+        image:
+          type: string
+          format: uri
+          example: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/mixed-berries-matcha-latte.jpg"
+        size:
+          type: array
+          items:
+            type: string
+            enum: [S, M, L]
+        extra_chf:
+          type: object
+          additionalProperties:
+            type: number
+          example:
+            S: 0
+            M: 2
+            L: 3
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ####################
+    # STORE
+    ####################
+    Store:
+      type: object
+      required:
+        - id
+        - name
+        - slug
+        - email
+        - address
+        - location
+        - is_active
+        - opening_hours
+        - created_at
+      properties:
+        id:
+          type: string
+          format: mongo-id
+          description: Identifiant unique.
+          example: "64c9f2e4f6a7b8c90d1e2f3"
+        name:
+          type: string
+          minLength: 3
+          maxLength: 50
+          example: "Ocha Neuchâtel Gare"
+        slug:
+          type: string
+          description: Identifiant lisible dans l'URL, unique.
+          example: "ocha-neuchatel-gare"
+        phone:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
         address:
           type: object
+          required:
+            - line1
+            - city
+            - zipcode
+            - country
           properties:
             line1:
               type: string
@@ -66,59 +252,174 @@ components:
               type: string
             country:
               type: string
+          example: {
+            line1: "Avenue de la Gare 1",
+            city: "Neuchâtel",
+            zipcode: "2000",
+            country: "Suisse"
+          }
         location:
           type: object
+          required:
+            - type
+            - coordinates
           properties:
             type:
               type: string
-              enum: ["Point"]
+              enum: [Point]
             coordinates:
               type: array
+              minItems: 2
+              maxItems: 2
               items:
                 type: number
-              example: [6.93, 46.99]
+          example: {
+            type: "Point",
+            coordinates: [6.9896, 46.9910]
+          }
+        is_active:
+          type: boolean
+          default: true
         opening_hours:
           type: array
+          minItems: 7
+          maxItems: 7
           items:
             type: array
+            nullable: true
             items:
               type: string
-    OrderItem:
-      type: object
-      properties:
-        product_id:
+              pattern: "^([01]\\d|2[0-3]):[0-5]\\d$"
+        created_at:
           type: string
-        size:
+          format: date-time
+        updated_at:
           type: string
-        quantity:
-          type: integer
+          format: date-time
+
+    ####################
+    # ORDER
+    ####################
     Order:
       type: object
+      required:
+        - id
+        - user_id
+        - store_id
+        - status
+        - pickup
+        - total_price_chf
+        - created_at
       properties:
         id:
           type: string
+          format: mongo-id
+          description: Identifiant unique.
+          example: "64d0f3f5a7b8c9d01e2f3g4"
         user_id:
-          $ref: "#/components/schemas/User"
+          type: string
+          format: mongo-id
+          description: Identifiant unique de l'utilisateur.
+          example: "64a7f0c2e4b0f5d6c8a1b2c3"
         store_id:
-          $ref: "#/components/schemas/Store"
+          type: string
+          format: mongo-id
+          description: Identifiant unique du magasin.
+          example: "64c9f2e4f6a7b8c90d1e2f3"
+        status:
+          type: string
+          enum:
+            - en préparation
+            - prête
+            - récupérée
+          default: en préparation
         pickup:
           type: string
           format: date-time
         total_price_chf:
           type: number
-        status:
+          minimum: 0
+        created_at:
           type: string
-          example: "pending"
-        items:
-          type: array
-          items:
-            $ref: "#/components/schemas/OrderItem"
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
 
+    ####################
+    # ORDER ITEM
+    ####################
+    OrderItem:
+      type: object
+      required:
+        - id
+        - order_id
+        - product_id
+        - product_name
+        - quantity
+        - size
+        - base_price_chf
+        - extra_chf
+        - final_price_chf
+        - created_at
+      properties:
+        id:
+          type: string
+          format: mongo-id
+          description: Identifiant unique.
+          example: "64e1f4g6b8c9d0e12f3g4h5"
+        order_id:
+          type: string
+          format: mongo-id
+          description: Identifiant unique de la commande.
+          example: "64d0f3f5a7b8c9d01e2f3g4"
+        product_id:
+          type: string
+          format: mongo-id
+          description: Identifiant unique du produit.
+          example: "64b8f1d3e5c6f7a8b9c0d1e2"
+        product_name:
+          type: string
+          example: "Strawberry Matcha Latte"
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 1
+        size:
+          type: string
+          enum: [S, M, L]
+          example: "M"
+        base_price_chf:
+          type: number
+          minimum: 0
+          description: Prix de base du produit.
+        extra_chf:
+          type: number
+          minimum: 0
+          description: Coût supplémentaire en fonction de la taille choisie.
+        final_price_chf:
+          type: number
+          minimum: 0
+          default: 0
+          description: Prix final calculé en fonction de la taille et du prix de base.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
 paths:
-
+  # ---------------------------------------
+  # Index
+  # ---------------------------------------
   /health:
     get:
+      tags:
+        - Index
       summary: Health check
+      description: Vérifie si l'API est opérationnelle.
+      operationId: healthCheck
       responses:
         "200":
           description: API is running
@@ -127,33 +428,39 @@ paths:
               schema:
                 type: string
                 example: "Ignition!"
-
-  /auth/register:
+  # ---------------------------------------
+  # Auth
+  # ---------------------------------------
+  /auth:
     post:
-      summary: Register a new user
+      tags:
+        - Auth
+      summary: Enregistre un nouvel utilisateur
+      description: Créer un nouveau compte utilisateur avec e-mail, mot de passe, nom d'affichage et numéro de téléphone optionnel.
+      operationId: registerUser
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required:
-                - email
-                - password
-                - display_name
-              properties:
-                email:
-                  type: string
-                  format: email
-                password:
-                  type: string
-                display_name:
-                  type: string
-                phone:
-                  type: string
+            examples:
+              sans téléphone:
+                summary: Inscription sans téléphone
+                value:
+                  email: "user@ocha.ch"
+                  password: "StrongP@ssw0rd!"
+                  display_name: "MatchaLover"
+              avec téléphone:
+                summary: Inscription avec téléphone
+                value:
+                  email: "user@ocha.ch"
+                  password: "StrongP@ssw0rd!"
+                  display_name: "MatchaLover"
+                  phone: "+41790000000"
       responses:
         "201":
-          description: User created
+          description: Utilisateur créé avec succès
           content:
             application/json:
               schema:
@@ -161,10 +468,24 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "User successfully registered"
                   token:
                     type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                   user:
-                    $ref: "#/components/schemas/User"
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: mongo-id
+                        example: "64a7f0c2e4b0f5d6c8a1b2c3"
+                      email:
+                        type: string
+                        format: email
+                        example: "user@ocha.ch"
+                      display_name:
+                        type: string
+                        example: "MatchaLover"
         "400":
           description: Bad request
         "409":
@@ -173,27 +494,25 @@ paths:
           description: Validation error
         "500":
           description: Internal server error
-
   /auth/login:
     post:
-      summary: Login user
+      tags:
+        - Auth
+      summary: Connecte un utilisateur
+      description: Authentifie un utilisateur avec son e-mail et mot de passe.
+      operationId: loginUser
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required:
-                - email
-                - password
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
+            example:
+              email: "user@ocha.ch"
+              password: "StrongP@ssw0rd!"
       responses:
         "200":
-          description: Successful login
+          description: Utilisateur connecté avec succès
           content:
             application/json:
               schema:
@@ -201,40 +520,87 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Login successful"
                   token:
                     type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                   user:
-                    $ref: "#/components/schemas/User"
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: mongo-id
+                        example: "64a7f0c2e4b0f5d6c8a1b2c3"
+                      email:
+                        type: string
+                        format: email
+                        example: "user@ocha.ch"
+                      display_name:
+                        type: string
+                        example: "MatchaLover"
         "400":
           description: Bad request
         "401":
           description: Unauthorized
         "500":
           description: Internal server error
-
+  # ---------------------------------------
+  # Users
+  # ---------------------------------------
   /users:
     get:
-      summary: Get current user profile
+      tags:
+        - Users
+      summary: Reccupère le profil de l'utilisateur actuel
+      description: Récupère le profil de l'utilisateur actuellement authentifié.
+      operationId: getUserProfile
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: User profile
+          description: Profil utilisateur récupéré avec succès
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   user:
-                    $ref: "#/components/schemas/User"
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: mongo-id
+                        example: "64a7f0c2e4b0f5d6c8a1b2c3"
+                      email:
+                        type: string
+                        format: email
+                        example: "user@ocha.ch"
+                      display_name:
+                        type: string
+                        example: "MatchaLover"
+                      phone:
+                        type: string
+                        example: "+41790000000"
+                      role:
+                        type: string
+                        example: "user"
+                      created_at:
+                        type: string
+                        format: date-time
+                      __v:
+                        type: integer
+                        example: 0
         "401":
           description: Unauthorized
         "500":
           description: Internal server error
-
   /users/orders:
     get:
-      summary: Get current user's orders
+      tags:
+        - Users
+      summary: Reccupère les commandes de l'utilisateur
+      description: Récupère les commandes passées par l'utilisateur actuellement authentifié.
+      operationId: getMyOrders
       security:
         - bearerAuth: []
       parameters:
@@ -264,12 +630,16 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Your orders history"
                   page:
                     type: integer
+                    example: 1
                   totalPages:
                     type: integer
+                    example: 2
                   totalOrders:
                     type: integer
+                    example: 15
                   orders:
                     type: array
                     items:
@@ -278,45 +648,140 @@ paths:
           description: Unauthorized
         "500":
           description: Internal server error
-
+  # ---------------------------------------
+  # Products
+  # ---------------------------------------
   /products:
     get:
-      summary: Get products
+      tags:
+        - Products
+      summary: Récupérer la liste des produits
+      description: |
+        Retourne une liste paginée des produits disponibles.
+        Les produits incluent les tailles disponibles et les prix supplémentaires
+        par taille.
+      operationId: getProducts
       parameters:
         - in: query
           name: page
+          required: false
+          description: Numéro de page
           schema:
             type: integer
+            minimum: 1
+            default: 1
         - in: query
           name: limit
+          required: false
+          description: Nombre de produits par page
           schema:
             type: integer
+            minimum: 1
+            default: 10
         - in: query
-          name: active
+          name: isActive
+          required: false
+          description: Filtrer les produits actifs/inactifs
           schema:
             type: boolean
       responses:
         "200":
-          description: Products list
+          description: Liste des produits
           content:
             application/json:
               schema:
                 type: object
                 properties:
+                  message:
+                    type: string
+                    example: "List of products"
                   page:
                     type: integer
+                    example: 1
                   totalPages:
                     type: integer
+                    example: 10
                   totalProducts:
                     type: integer
+                    example: 10
                   products:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Product"
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                          format: mongo-id
+                        slug:
+                          type: string
+                          example: "classic-matcha-latte"
+                        name:
+                          type: string
+                          example: "Classic Matcha Latte"
+                        category:
+                          type: string
+                          example: "Matcha"
+                        description:
+                          type: string
+                        basePriceCHF:
+                          type: number
+                          example: 5.9
+                        isActive:
+                          type: boolean
+                          example: true
+                        image:
+                          type: string
+                          format: uri
+                        size:
+                          type: array
+                          items:
+                            type: string
+                            enum: [S, M, L]
+                        extra_chf:
+                          type: object
+                          additionalProperties:
+                            type: number
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+                        __v:
+                          type: integer
+              example:
+                message: "List of products"
+                page: 1
+                totalPages: 10
+                totalProducts: 10
+                products:
+                  - _id: "695fb951bf4a414b74147b9e"
+                    slug: "classic-matcha-latte"
+                    name: "Classic Matcha Latte"
+                    category: "Matcha"
+                    description: "Matcha latte classique, équilibré et crémeux."
+                    basePriceCHF: 5.9
+                    isActive: true
+                    image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/classic-matcha-latte.jpg"
+                    size: ["S", "M", "L"]
+                    extra_chf:
+                      S: 0
+                      M: 2
+                      L: 3
+                    createdAt: "2026-01-08T14:04:01.597Z"
+                    updatedAt: "2026-01-08T14:04:01.597Z"
+                    __v: 0
         "500":
           description: Internal server error
+
     post:
-      summary: Create product
+      tags:
+        - Products
+      summary: Créer un produit
+      description: |
+        Crée un nouveau produit Ocha.
+        Endpoint réservé aux administrateurs.
+      operationId: createProduct
       security:
         - bearerAuth: []
       requestBody:
@@ -324,10 +789,136 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Product"
+              type: object
+              required:
+                - slug
+                - name
+                - category
+                - description
+                - basePriceCHF
+                - image
+                - size
+                - extra_chf
+              properties:
+                slug:
+                  type: string
+                  example: "white-matcha-latte"
+                name:
+                  type: string
+                  example: "White Matcha Latte"
+                category:
+                  type: string
+                  example: "Boissons"
+                description:
+                  type: string
+                  example: "Delicious strawberry matcha latte"
+                basePriceCHF:
+                  type: number
+                  example: 5
+                image:
+                  type: string
+                  format: uri
+                  example: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/mixed-berries-matcha-latte.jpg"
+                isActive:
+                  type: boolean
+                  default: true
+                size:
+                  type: array
+                  items:
+                    type: string
+                    enum: [S, M, L]
+                extra_chf:
+                  type: object
+                  additionalProperties:
+                    type: number
+                  example:
+                    S: 0
+                    M: 2
+                    L: 3
+            example:
+              slug: "white-matcha-latte"
+              name: "White Matcha Latte"
+              category: "Boissons"
+              description: "Delicious strawberry matcha latte"
+              basePriceCHF: 5
+              image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/mixed-berries-matcha-latte.jpg"
+              isActive: true
+              size: ["S", "M", "L"]
+              extra_chf:
+                S: 0
+                M: 2
+                L: 3
       responses:
         "201":
-          description: Product created
+          description: Produit créé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product created"
+                  product:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        format: mongo-id
+                        example: "6962eb966aaa44672169d87e"
+                      slug:
+                        type: string
+                      name:
+                        type: string
+                      category:
+                        type: string
+                      description:
+                        type: string
+                      basePriceCHF:
+                        type: number
+                      isActive:
+                        type: boolean
+                      image:
+                        type: string
+                        format: uri
+                      size:
+                        type: array
+                        items:
+                          type: string
+                      extra_chf:
+                        type: object
+                        additionalProperties:
+                          type: number
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2026-01-11T00:15:18.543Z"
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: "2026-01-11T00:15:18.543Z"
+                      __v:
+                        type: integer
+                        example: 0
+              example:
+                message: "Product created"
+                product:
+                  slug: "white-matcha-latte"
+                  name: "White Matcha Latte"
+                  category: "Boissons"
+                  description: "Delicious strawberry matcha latte"
+                  basePriceCHF: 5
+                  isActive: true
+                  image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/mixed-berries-matcha-latte.jpg"
+                  size: ["S", "M", "L"]
+                  extra_chf:
+                    S: 0
+                    M: 2
+                    L: 3
+                  _id: "6962eb966aaa44672169d87e"
+                  createdAt: "2026-01-11T00:15:18.543Z"
+                  updatedAt: "2026-01-11T00:15:18.543Z"
+                  __v: 0
         "400":
           description: Bad request
         "401":
@@ -343,56 +934,250 @@ paths:
 
   /products/{id}:
     get:
-      summary: Get product by ID
+      tags:
+        - Products
+      summary: Récupérer un produit par ID
+      description: |
+        Retourne les détails complets d’un produit Ocha à partir de son identifiant.
+      operationId: getProductById
       parameters:
         - in: path
           name: id
           required: true
+          description: Identifiant MongoDB du produit
           schema:
             type: string
+            format: mongo-id
       responses:
         "200":
-          description: Product found
+          description: Produit trouvé
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Product"
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product found"
+                  product:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        format: mongo-id
+                        example: "695fb951bf4a414b74147b9e"
+                      slug:
+                        type: string
+                        example: "classic-matcha-latte"
+                      name:
+                        type: string
+                        example: "Classic Matcha Latte"
+                      category:
+                        type: string
+                        example: "Matcha"
+                      description:
+                        type: string
+                        example: "Matcha latte classique, équilibré et crémeux."
+                      basePriceCHF:
+                        type: number
+                        example: 5.9
+                      isActive:
+                        type: boolean
+                        example: true
+                      image:
+                        type: string
+                        format: uri
+                        example: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/classic-matcha-latte.jpg"
+                      size:
+                        type: array
+                        items:
+                          type: string
+                          enum: [S, M, L]
+                      extra_chf:
+                        type: object
+                        additionalProperties:
+                          type: number
+                        example:
+                          S: 0
+                          M: 2
+                          L: 3
+                      createdAt:
+                        type: string
+                        format: date-time
+                        example: "2026-01-08T14:04:01.597Z"
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        example: "2026-01-08T14:04:01.597Z"
+                      __v:
+                        type: integer
+                        example: 0
+              example:
+                message: "Product found"
+                product:
+                  _id: "695fb951bf4a414b74147b9e"
+                  slug: "classic-matcha-latte"
+                  name: "Classic Matcha Latte"
+                  category: "Matcha"
+                  description: "Matcha latte classique, équilibré et crémeux."
+                  basePriceCHF: 5.9
+                  isActive: true
+                  image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/classic-matcha-latte.jpg"
+                  size: ["S", "M", "L"]
+                  extra_chf:
+                    S: 0
+                    M: 2
+                    L: 3
+                  createdAt: "2026-01-08T14:04:01.597Z"
+                  updatedAt: "2026-01-08T14:04:01.597Z"
+                  __v: 0
         "404":
-          description: Not found
+          description: Product not found
         "500":
           description: Internal server error
+
     patch:
-      summary: Update product
+      tags:
+        - Products
+      summary: Mettre à jour partiellement un produit
+      description: |
+        Met à jour un ou plusieurs champs d’un produit existant.
+        Endpoint réservé aux administrateurs.
+      operationId: updateProduct
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
+          description: Identifiant du produit
           schema:
             type: string
+            format: mongo-id
+            example: "6962eb966aaa44672169d87e"
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Product"
+              type: object
+              additionalProperties: false
+              properties:
+                slug:
+                  type: string
+                name:
+                  type: string
+                category:
+                  type: string
+                description:
+                  type: string
+                basePriceCHF:
+                  type: number
+                isActive:
+                  type: boolean
+                image:
+                  type: string
+                  format: uri
+                size:
+                  type: array
+                  items:
+                    type: string
+                    enum: [S, M, L]
+                extra_chf:
+                  type: object
+                  additionalProperties:
+                    type: number
+            example:
+              extra_chf:
+                S: 0
+                M: 3
+                L: 6
       responses:
         "200":
-          description: Product updated
+          description: Produit mis à jour
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product updated"
+                  product:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        format: mongo-id
+                      slug:
+                        type: string
+                      name:
+                        type: string
+                      category:
+                        type: string
+                      description:
+                        type: string
+                      basePriceCHF:
+                        type: number
+                      isActive:
+                        type: boolean
+                      image:
+                        type: string
+                        format: uri
+                      size:
+                        type: array
+                        items:
+                          type: string
+                      extra_chf:
+                        type: object
+                        additionalProperties:
+                          type: number
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                      __v:
+                        type: integer
+              example:
+                message: "Product updated"
+                product:
+                  _id: "6962eb966aaa44672169d87e"
+                  slug: "white-matcha-latte"
+                  name: "White Matcha Latte"
+                  category: "Boissons"
+                  description: "Delicious strawberry matcha latte"
+                  basePriceCHF: 5
+                  isActive: true
+                  image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/mixed-berries-matcha-latte.jpg"
+                  size: ["S", "M", "L"]
+                  extra_chf:
+                    S: 0
+                    M: 3
+                    L: 6
+                  createdAt: "2026-01-11T00:15:18.543Z"
+                  updatedAt: "2026-01-11T00:18:19.260Z"
+                  __v: 0
+        "400":
+          description: Bad request
         "401":
           description: Unauthorized
         "403":
           description: Forbidden
         "404":
-          description: Not found
-        "409":
-          description: Conflict
+          description: Product not found
         "422":
           description: Validation error
         "500":
           description: Internal server error
+
     delete:
-      summary: Delete product
+      tags:
+        - Products
+      summary: Supprime un produit
+      description: Supprime un produit existant par son identifiant.
+      operationId: deleteProduct
       security:
         - bearerAuth: []
       parameters:
@@ -403,40 +1188,68 @@ paths:
             type: string
       responses:
         "204":
-          description: Product deleted
+          description: Product deleted successfully
         "401":
           description: Unauthorized
         "403":
           description: Forbidden
         "404":
-          description: Not found
+          description: Product not found
         "500":
           description: Internal server error
 
-  /products/{id}/image:
     put:
-      summary: Upload product image
+      tags:
+        - Products
+      summary: Mettre à jour l’image d’un produit
+      description: |
+        Remplace l’image associée à un produit existant.
+        Retourne l’URL finale de l’image stockée (Cloudinary).
+      operationId: uploadProductImage
       security:
         - bearerAuth: []
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
+          description: Identifiant du produit
           schema:
             type: string
+            format: mongo-id
+            example: "6962eb966aaa44672169d87e"
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
+              additionalProperties: false
+              required:
+                - image
               properties:
                 image:
                   type: string
-                  format: binary
+                  format: uri
+                  description: URL de l’image à associer au produit
+            example:
+              image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1768091151/products/white-matcha-latte.jpg"
       responses:
         "200":
-          description: Product image updated
+          description: Image mise à jour avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Image uploaded successfully"
+                  imageUrl:
+                    type: string
+                    format: uri
+              example:
+                message: "Image uploaded successfully"
+                imageUrl: "https://res.cloudinary.com/dabosy2w2/image/upload/v1768091192/products/white-matcha-latte.jpg"
         "400":
           description: Bad request
         "401":
@@ -444,18 +1257,22 @@ paths:
         "403":
           description: Forbidden
         "404":
-          description: Not found
+          description: Product not found
         "422":
           description: Validation error
         "500":
           description: Internal server error
 
-# ---------------------------------------
-# Stores
-# ---------------------------------------
+  # ---------------------------------------
+  # Stores
+  # ---------------------------------------
   /stores:
     get:
-      summary: Get list of stores
+      tags:
+        - Stores
+      summary: Récupère la liste des magasins
+      description: Récupère les magasins avec pagination et possibilité de filtrer par proximité géographique.
+      operationId: getStores
       parameters:
         - in: query
           name: page
@@ -469,19 +1286,103 @@ paths:
           name: near
           schema:
             type: string
+          description: Coordonnées sous forme "longitude,latitude" pour filtrer les magasins proches
         - in: query
           name: radius
           schema:
             type: integer
+          description: Rayon de recherche en mètres
       responses:
         "200":
-          description: Stores list
+          description: Liste des magasins récupérée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "List of stores"
+                  page:
+                    type: integer
+                    example: 1
+                  totalPages:
+                    type: integer
+                    example: 1
+                  totalStores:
+                    type: integer
+                    example: 5
+                  stores:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Store"
+              example:
+                message: "List of stores"
+                page: 1
+                totalPages: 1
+                totalStores: 5
+                stores:
+                  - _id: "695fb9529b09cba35cad0044"
+                    name: "Ocha Lausanne Flon"
+                    slug: "ocha-lausanne-flon"
+                    phone: "+41214445566"
+                    email: "lausanne-flon@ocha.ch"
+                    is_active: true
+                    address:
+                      line1: "Rue de Genève 21"
+                      city: "Lausanne"
+                      zipcode: "1003"
+                      country: "Suisse"
+                    location:
+                      type: "Point"
+                      coordinates: [6.629, 46.522]
+                    opening_hours:
+                      - []
+                      - ["09:00","18:30"]
+                      - ["09:00","18:30"]
+                      - ["09:00","18:30"]
+                      - ["09:00","20:00"]
+                      - ["09:00","20:00"]
+                      - ["10:00","18:00"]
+                    created_at: "2026-01-08T14:04:02.656Z"
+                    updated_at: "2026-01-08T14:04:02.656Z"
+                    __v: 0
+                  - _id: "695fb9529b09cba35cad0045"
+                    name: "Ocha Neuchâtel Gare"
+                    slug: "ocha-neuchatel-gare"
+                    phone: "+41214445567"
+                    email: "neuchatel-gare@ocha.ch"
+                    is_active: true
+                    address:
+                      line1: "Avenue de la Gare 1"
+                      city: "Neuchâtel"
+                      zipcode: "2000"
+                      country: "Suisse"
+                    location:
+                      type: "Point"
+                      coordinates: [6.9896, 46.9910]
+                    opening_hours:
+                      - []
+                      - ["08:30","18:00"]
+                      - ["08:30","18:00"]
+                      - ["08:30","18:00"]
+                      - ["08:30","19:00"]
+                      - ["08:30","19:00"]
+                      - ["09:00","17:00"]
+                    created_at: "2026-01-08T14:10:00.000Z"
+                    updated_at: "2026-01-08T14:10:00.000Z"
+                    __v: 0
         "400":
           description: Bad request
         "500":
           description: Internal server error
+
     post:
-      summary: Create store
+      tags:
+        - Stores
+      summary: Crée un nouveau magasin
+      description: Crée un magasin Ocha avec toutes ses informations (nom, email, téléphone, adresse, localisation et horaires d'ouverture).
+      operationId: createStore
       security:
         - bearerAuth: []
       requestBody:
@@ -489,10 +1390,124 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Store"
+              type: object
+              required:
+                - name
+                - email
+                - address
+                - location
+                - opening_hours
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                  nullable: true
+                address:
+                  type: object
+                  required:
+                    - line1
+                    - city
+                    - zipcode
+                    - country
+                  properties:
+                    line1:
+                      type: string
+                    city:
+                      type: string
+                    zipcode:
+                      type: string
+                    country:
+                      type: string
+                location:
+                  type: object
+                  required:
+                    - type
+                    - coordinates
+                  properties:
+                    type:
+                      type: string
+                      enum: [Point]
+                    coordinates:
+                      type: array
+                      minItems: 2
+                      maxItems: 2
+                      items:
+                        type: number
+                opening_hours:
+                  type: array
+                  minItems: 7
+                  maxItems: 7
+                  items:
+                    type: array
+                    nullable: true
+                    items:
+                      type: string
+                      pattern: "^([01]\\d|2[0-3]):[0-5]\\d$"
+            example:
+              name: "Ocha Neuchâtel"
+              email: "neuchatel@ocha.ch"
+              phone: "12345678"
+              address:
+                line1: "Avenue de la Gare 1"
+                city: "Neuchâtel"
+                zipcode: "2000"
+                country: "Suisse"
+              location:
+                type: "Point"
+                coordinates: [6.93, 46.99]
+              opening_hours:
+                - []
+                - ["08:00", "18:00"]
+                - ["08:00", "18:00"]
+                - ["08:00", "18:00"]
+                - ["08:00", "20:00"]
+                - ["08:00", "20:00"]
+                - ["09:00", "17:00"]
       responses:
         "201":
-          description: Store created
+          description: Magasin créé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Store created"
+                  store:
+                    $ref: "#/components/schemas/Store"
+              example:
+                message: "Store created"
+                store:
+                  _id: "6962e0fd6aaa44672169d804"
+                  name: "Ocha Neuchâtel"
+                  slug: "ocha-neuchatel"
+                  phone: "12345678"
+                  email: "neuchatel@ocha.ch"
+                  is_active: true
+                  address:
+                    line1: "Avenue de la Gare 1"
+                    city: "Neuchâtel"
+                    zipcode: "2000"
+                    country: "Suisse"
+                  location:
+                    type: "Point"
+                    coordinates: [6.93, 46.99]
+                  opening_hours:
+                    - []
+                    - ["08:00","18:00"]
+                    - ["08:00","18:00"]
+                    - ["08:00","18:00"]
+                    - ["08:00","20:00"]
+                    - ["08:00","20:00"]
+                    - ["09:00","17:00"]
+                  created_at: "2026-01-10T23:30:05.756Z"
+                  updated_at: "2026-01-10T23:30:05.757Z"
+                  __v: 0
         "400":
           description: Bad request
         "401":
@@ -508,7 +1523,11 @@ paths:
 
   /stores/{id}:
     get:
-      summary: Get store by ID
+      tags:
+        - Stores
+      summary: Récupère un magasin par ID
+      description: Récupère les informations détaillées d'un magasin spécifique.
+      operationId: getStoreById
       parameters:
         - in: path
           name: id
@@ -517,15 +1536,56 @@ paths:
             type: string
       responses:
         "200":
-          description: Store found
-        "400":
-          description: Bad request
+          description: Magasin trouvé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Store found"
+                  store:
+                    $ref: "#/components/schemas/Store"
+              example:
+                message: "Store found"
+                store:
+                  _id: "695fb9529b09cba35cad0044"
+                  name: "Ocha Lausanne Flon"
+                  slug: "ocha-lausanne-flon"
+                  phone: "+41214445566"
+                  email: "lausanne-flon@ocha.ch"
+                  is_active: true
+                  address:
+                    line1: "Rue de Genève 21"
+                    city: "Lausanne"
+                    zipcode: "1003"
+                    country: "Suisse"
+                  location:
+                    type: "Point"
+                    coordinates: [6.629, 46.522]
+                  opening_hours:
+                    - []
+                    - ["09:00","18:30"]
+                    - ["09:00","18:30"]
+                    - ["09:00","18:30"]
+                    - ["09:00","20:00"]
+                    - ["09:00","20:00"]
+                    - ["10:00","18:00"]
+                  created_at: "2026-01-08T14:04:02.656Z"
+                  updated_at: "2026-01-08T14:04:02.656Z"
+                  __v: 0
         "404":
-          description: Not found
+          description: Store not found
         "500":
           description: Internal server error
+
     patch:
-      summary: Update store
+      tags:
+        - Stores
+      summary: Met à jour un magasin
+      description: Met à jour les informations d'un magasin existant, comme le nom, l'adresse, la localisation ou les horaires d'ouverture.
+      operationId: updateStore
       security:
         - bearerAuth: []
       parameters:
@@ -535,13 +1595,120 @@ paths:
           schema:
             type: string
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Store"
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                  nullable: true
+                address:
+                  type: object
+                  required:
+                    - line1
+                    - city
+                    - zipcode
+                    - country
+                  properties:
+                    line1:
+                      type: string
+                    city:
+                      type: string
+                    zipcode:
+                      type: string
+                    country:
+                      type: string
+                location:
+                  type: object
+                  required:
+                    - type
+                    - coordinates
+                  properties:
+                    type:
+                      type: string
+                      enum: [Point]
+                    coordinates:
+                      type: array
+                      minItems: 2
+                      maxItems: 2
+                      items:
+                        type: number
+                opening_hours:
+                  type: array
+                  minItems: 7
+                  maxItems: 7
+                  items:
+                    type: array
+                    nullable: true
+                    items:
+                      type: string
+                      pattern: "^([01]\\d|2[0-3]):[0-5]\\d$"
+            example:
+              name: "Ocha Neuchâtel Gare"
+              address:
+                line1: "Avenue de la Gare 2"
+                city: "Neuchâtel"
+                zipcode: "2000"
+                country: "Suisse"
+              location:
+                type: "Point"
+                coordinates: [6.931444286600357, 46.99321666053446]
+              opening_hours:
+                - []
+                - ["08:00","18:00"]
+                - ["08:00","18:00"]
+                - ["08:00","18:00"]
+                - ["08:00","18:00"]
+                - ["08:00","20:00"]
+                - ["08:00","20:00"]
       responses:
         "200":
-          description: Store updated
+          description: Magasin mis à jour avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Store updated"
+                  store:
+                    $ref: "#/components/schemas/Store"
+              example:
+                message: "Store updated"
+                store:
+                  _id: "6962e0fd6aaa44672169d804"
+                  name: "Ocha Neuchâtel Gare"
+                  slug: "ocha-neuchatel-gare"
+                  phone: "12345678"
+                  email: "neuchatel@ocha.ch"
+                  is_active: true
+                  address:
+                    line1: "Avenue de la Gare 2"
+                    city: "Neuchâtel"
+                    zipcode: "2000"
+                    country: "Suisse"
+                  location:
+                    type: "Point"
+                    coordinates: [6.931444286600357, 46.99321666053446]
+                  opening_hours:
+                    - []
+                    - ["08:00","18:00"]
+                    - ["08:00","18:00"]
+                    - ["08:00","18:00"]
+                    - ["08:00","18:00"]
+                    - ["08:00","20:00"]
+                    - ["08:00","20:00"]
+                  created_at: "2026-01-10T23:30:05.756Z"
+                  updated_at: "2026-01-10T23:32:59.994Z"
+                  __v: 1
         "400":
           description: Bad request
         "401":
@@ -556,8 +1723,13 @@ paths:
           description: Validation error
         "500":
           description: Internal server error
+
     delete:
-      summary: Delete store
+      tags:
+        - Stores
+      summary: Supprime un magasin
+      description: Supprime un magasin existant par son identifiant.
+      operationId: deleteStore
       security:
         - bearerAuth: []
       parameters:
@@ -568,22 +1740,25 @@ paths:
             type: string
       responses:
         "204":
-          description: Store deleted
+          description: Store deleted successfully
         "401":
           description: Unauthorized
         "403":
           description: Forbidden
         "404":
-          description: Not found
+          description: Store not found
         "500":
           description: Internal server error
-
-# ---------------------------------------
-# Orders
-# ---------------------------------------
+  # ---------------------------------------
+  # Orders
+  # ---------------------------------------
   /orders:
     post:
-      summary: Create a new order
+      tags:
+        - Orders
+      summary: Crée une nouvelle commande
+      description: Permet à un utilisateur authentifié de créer une commande dans un magasin spécifique avec une date de pickup et des items.
+      operationId: createOrder
       security:
         - bearerAuth: []
       requestBody:
@@ -591,10 +1766,132 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Order"
+              type: object
+              required:
+                - store_id
+                - pickup
+                - items
+              properties:
+                store_id:
+                  type: string
+                  description: ID du magasin
+                pickup:
+                  type: string
+                  format: date-time
+                  description: Date et heure de retrait
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - product_id
+                      - size
+                      - quantity
+                    properties:
+                      product_id:
+                        type: string
+                        description: ID du produit
+                      size:
+                        type: string
+                        enum: [S, M, L]
+                      quantity:
+                        type: integer
+                        minimum: 1
+                        default: 1
+            example:
+              store_id: "6962e0fd6aaa44672169d804"
+              pickup: "2026-01-12T14:00:00.000Z"
+              items:
+                - product_id: "695fb951bf4a414b74147b9e"
+                  size: "M"
+                  quantity: 1
       responses:
         "201":
-          description: Order created
+          description: Commande créée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Order successfully created"
+                  order:
+                    type: object
+                    description: Détails de la commande créée
+                    properties:
+                      _id:
+                        type: string
+                        format: mongo-id
+                      user_id:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                            format: mongo-id
+                          email:
+                            type: string
+                          display_name:
+                            type: string
+                      store_id:
+                        $ref: "#/components/schemas/Store"
+                      status:
+                        type: string
+                        example: "en préparation"
+                      pickup:
+                        type: string
+                        format: date-time
+                      total_price_chf:
+                        type: number
+                        example: 7.9
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                      __v:
+                        type: integer
+              example:
+                message: "Order successfully created"
+                order:
+                  _id: "6962e54c6aaa44672169d83c"
+                  user_id:
+                    _id: "6960b6eb75f97d829b1978fc"
+                    email: "user@ocha.ch"
+                    display_name: "User_2002"
+                  store_id:
+                    _id: "6962e0fd6aaa44672169d804"
+                    name: "Ocha Neuchâtel Gare"
+                    slug: "ocha-neuchatel-gare"
+                    phone: "12345678"
+                    email: "neuchatel@ocha.ch"
+                    is_active: true
+                    address:
+                      line1: "Avenue de la Gare 2"
+                      city: "Neuchâtel"
+                      zipcode: "2000"
+                      country: "Suisse"
+                    location:
+                      type: "Point"
+                      coordinates: [6.931444286600357, 46.99321666053446]
+                    opening_hours:
+                      - []
+                      - ["08:00","18:00"]
+                      - ["08:00","18:00"]
+                      - ["08:00","18:00"]
+                      - ["08:00","18:00"]
+                      - ["08:00","20:00"]
+                      - ["08:00","20:00"]
+                    created_at: "2026-01-10T23:30:05.756Z"
+                    updated_at: "2026-01-10T23:32:59.994Z"
+                    __v: 1
+                  status: "en préparation"
+                  pickup: "2026-01-12T14:00:00.000Z"
+                  total_price_chf: 7.9
+                  createdAt: "2026-01-10T23:48:28.906Z"
+                  updatedAt: "2026-01-10T23:48:28.917Z"
+                  __v: 0
         "400":
           description: Bad request
         "401":
@@ -608,7 +1905,11 @@ paths:
 
   /orders/{id}:
     get:
-      summary: Get order by ID
+      tags:
+        - Orders
+      summary: Récupère une commande par ID
+      description: Permet à un utilisateur authentifié de récupérer une commande spécifique par son identifiant.
+      operationId: getOrderById
       security:
         - bearerAuth: []
       parameters:
@@ -617,36 +1918,186 @@ paths:
           required: true
           schema:
             type: string
+            description: ID de la commande
       responses:
         "200":
-          description: Order found
+          description: Commande trouvée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Order found"
+                  order:
+                    type: object
+                    description: Détails de la commande
+                    properties:
+                      _id:
+                        type: string
+                        format: mongo-id
+                      user_id:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                            format: mongo-id
+                          email:
+                            type: string
+                          display_name:
+                            type: string
+                      store_id:
+                        $ref: "#/components/schemas/Store"
+                      status:
+                        type: string
+                        example: "en préparation"
+                      pickup:
+                        type: string
+                        format: date-time
+                      total_price_chf:
+                        type: number
+                        example: 7.9
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                      __v:
+                        type: integer
+              example:
+                message: "Order found"
+                order:
+                  _id: "6962e54c6aaa44672169d83c"
+                  user_id:
+                    _id: "6960b6eb75f97d829b1978fc"
+                    email: "user@ocha.ch"
+                    display_name: "User_2002"
+                  store_id:
+                    _id: "6962e0fd6aaa44672169d804"
+                    name: "Ocha Neuchâtel Gare"
+                    slug: "ocha-neuchatel-gare"
+                    phone: "12345678"
+                    email: "neuchatel@ocha.ch"
+                    is_active: true
+                    address:
+                      line1: "Avenue de la Gare 2"
+                      city: "Neuchâtel"
+                      zipcode: "2000"
+                      country: "Suisse"
+                    location:
+                      type: "Point"
+                      coordinates: [6.931444286600357, 46.99321666053446]
+                    opening_hours:
+                      - []
+                      - ["08:00","18:00"]
+                      - ["08:00","18:00"]
+                      - ["08:00","18:00"]
+                      - ["08:00","18:00"]
+                      - ["08:00","20:00"]
+                      - ["08:00","20:00"]
+                    created_at: "2026-01-10T23:30:05.756Z"
+                    updated_at: "2026-01-10T23:32:59.994Z"
+                    __v: 1
+                  status: "en préparation"
+                  pickup: "2026-01-12T14:00:00.000Z"
+                  total_price_chf: 7.9
+                  createdAt: "2026-01-10T23:48:28.906Z"
+                  updatedAt: "2026-01-10T23:48:28.917Z"
+                  __v: 0
         "401":
           description: Unauthorized
         "404":
-          description: Not found
+          description: Order not found
         "500":
           description: Internal server error
+
     patch:
-      summary: Update order
+      tags:
+        - Orders
+      summary: Mettre à jour le statut d'une commande
+      description: |
+        Permet de mettre à jour le statut d'une commande existante.
+        Route généralement réservée aux administrateurs ou au personnel du magasin.
+      operationId: updateOrderStatus
       security:
         - bearerAuth: []
       parameters:
         - in: path
           name: id
           required: true
+          description: Identifiant de la commande
           schema:
             type: string
+            format: mongo-id
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - status
               properties:
                 status:
                   type: string
+                  description: Nouveau statut de la commande
+                  example: "prête"
+            example:
+              status: "prête"
       responses:
         "200":
-          description: Order updated
+          description: Statut de la commande mis à jour
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Order status updated"
+                  order:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        format: mongo-id
+                      user_id:
+                        type: string
+                        format: mongo-id
+                      store_id:
+                        type: string
+                        format: mongo-id
+                      status:
+                        type: string
+                        example: "prête"
+                      pickup:
+                        type: string
+                        format: date-time
+                      total_price_chf:
+                        type: number
+                        example: 7.9
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                      __v:
+                        type: integer
+              example:
+                message: "Order status updated"
+                order:
+                  _id: "6962e54c6aaa44672169d83c"
+                  user_id: "6960b6eb75f97d829b1978fc"
+                  store_id: "6962e0fd6aaa44672169d804"
+                  status: "prête"
+                  pickup: "2026-01-12T14:00:00.000Z"
+                  total_price_chf: 7.9
+                  createdAt: "2026-01-10T23:48:28.906Z"
+                  updatedAt: "2026-01-10T23:55:04.507Z"
+                  __v: 0
         "400":
           description: Bad request
         "401":
@@ -654,15 +2105,16 @@ paths:
         "403":
           description: Forbidden
         "404":
-          description: Not found
-        "409":
-          description: Conflict
-        "422":
-          description: Validation error
+          description: Order not found
         "500":
           description: Internal server error
+
     delete:
-      summary: Delete order
+      tags:
+        - Orders
+      summary: Supprime une commande
+      description: Supprime une commande existante par son identifiant.
+      operationId: deleteOrder
       security:
         - bearerAuth: []
       parameters:
@@ -673,34 +2125,7 @@ paths:
             type: string
       responses:
         "204":
-          description: Order deleted
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not found
-        "500":
-          description: Internal server error
-
-  /orders/{id}/items:
-    get:
-      summary: Get items of a specific order
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: List of order items
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/OrderItem"
+          description: Order deleted successfully
         "401":
           description: Unauthorized
         "404":
@@ -708,17 +2133,206 @@ paths:
         "500":
           description: Internal server error
 
-# ---------------------------------------
-# Order Stats
-# ---------------------------------------
+  /orders/{id}/items:
+    get:
+      tags:
+        - Orders
+      summary: Récupérer les items d'une commande
+      description: |
+        Retourne la liste des produits (items) associés à une commande donnée.
+        Chaque item contient les informations du produit, la taille choisie,
+        les prix calculés et la quantité.
+      operationId: getOrderItems
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Identifiant de la commande
+          schema:
+            type: string
+            format: mongo-id
+      responses:
+        "200":
+          description: Liste des items de la commande
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "List of items in the order"
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                          format: mongo-id
+                        order_id:
+                          type: string
+                          format: mongo-id
+                        product_id:
+                          type: object
+                          description: Produit associé (populated)
+                          properties:
+                            _id:
+                              type: string
+                              format: mongo-id
+                            slug:
+                              type: string
+                            name:
+                              type: string
+                            category:
+                              type: string
+                            description:
+                              type: string
+                            basePriceCHF:
+                              type: number
+                              example: 5.9
+                            isActive:
+                              type: boolean
+                            image:
+                              type: string
+                              format: uri
+                            size:
+                              type: array
+                              items:
+                                type: string
+                                enum: [S, M, L]
+                            extra_chf:
+                              type: object
+                              additionalProperties:
+                                type: number
+                            createdAt:
+                              type: string
+                              format: date-time
+                            updatedAt:
+                              type: string
+                              format: date-time
+                            __v:
+                              type: integer
+                        quantity:
+                          type: integer
+                          minimum: 1
+                          example: 1
+                        size:
+                          type: string
+                          enum: [S, M, L]
+                          example: "M"
+                        extra_chf:
+                          type: number
+                          example: 2
+                        product_name:
+                          type: string
+                          example: "Classic Matcha Latte"
+                        base_price_chf:
+                          type: number
+                          example: 5.9
+                        final_price_chf:
+                          type: number
+                          example: 7.9
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+                        __v:
+                          type: integer
+              example:
+                message: "List of items in the order"
+                items:
+                  - _id: "6962e54c6aaa44672169d83e"
+                    order_id: "6962e54c6aaa44672169d83c"
+                    product_id:
+                      _id: "695fb951bf4a414b74147b9e"
+                      slug: "classic-matcha-latte"
+                      name: "Classic Matcha Latte"
+                      category: "Matcha"
+                      description: "Matcha latte classique, équilibré et crémeux."
+                      basePriceCHF: 5.9
+                      isActive: true
+                      image: "https://res.cloudinary.com/dabosy2w2/image/upload/v1765369784/classic-matcha-latte.jpg"
+                      size: ["S", "M", "L"]
+                      extra_chf:
+                        S: 0
+                        M: 2
+                        L: 3
+                      createdAt: "2026-01-08T14:04:01.597Z"
+                      updatedAt: "2026-01-08T14:04:01.597Z"
+                      __v: 0
+                    quantity: 1
+                    size: "M"
+                    extra_chf: 2
+                    product_name: "Classic Matcha Latte"
+                    base_price_chf: 5.9
+                    final_price_chf: 7.9
+                    createdAt: "2026-01-10T23:48:28.913Z"
+                    updatedAt: "2026-01-10T23:48:28.913Z"
+                    __v: 0
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Order not found
+        "500":
+          description: Internal server error
+  # ---------------------------------------
+  # Order Stats
+  # ---------------------------------------
   /order-stats:
     get:
+      tags:
+        - Order Stats
       summary: Get order statistics
+      description: Récupère les statistiques des commandes par utilisateur.
+      operationId: getOrderStats
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: List of order statistics per user
+          description: Statistiques des commandes récupérées avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stats:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                      stats:
+                        type: object
+                        properties:
+                          totalOrders:
+                            type: integer
+                            example: 11
+                          userId:
+                            type: string
+                            format: mongo-id
+                            example: "695f96079e3decb1f352e71b"
+                          user:
+                            type: string
+                            example: "MatchaLover"
+                          totalSpent:
+                            type: number
+                            example: 150.5
+              example:
+                stats:
+                  - totalOrders: 10
+                    userId: "695f96079e3decb1f352e71b"
+                    user: "MatchaLover"
+                    totalSpent: 101
+                  - totalOrders: 4
+                    userId: "695f96079e3decb1f352e71c"
+                    user: "TeaEnthusiast"
+                    totalSpent: 34.4
         "401":
           description: Unauthorized
         "403":
